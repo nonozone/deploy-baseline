@@ -53,7 +53,7 @@ require_env "APP_PUBLISH_PORT"
 require_env "APP_INTERNAL_PORT"
 require_env "DB_PASSWORD"
 
-reject_placeholder '^APP_IMAGE=sampleapp:latest$' "APP_IMAGE 仍是模板默认值，请替换为项目实际镜像。"
+reject_placeholder '^APP_IMAGE=sampleapp:(latest|replace-with-git-sha)$' "APP_IMAGE 仍是模板默认值，请替换为项目实际镜像版本。建议使用 Git Commit SHA 或语义化版本号。"
 reject_placeholder '^DB_PASSWORD=change-me(-in-production)?$' "DB_PASSWORD 仍是模板占位值，请替换为真实配置。"
 
 if ! grep -Eq 'healthcheck:' "$ROOT_DIR/docker-compose.prod.yml"; then

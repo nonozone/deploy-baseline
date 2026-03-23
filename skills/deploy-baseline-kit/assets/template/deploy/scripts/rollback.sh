@@ -9,7 +9,13 @@ if [[ -z "${ROLLBACK_IMAGE:-}" ]]; then
   echo "未配置 ROLLBACK_IMAGE。"
   echo "项目接入时必须把真实回滚策略补充到 deploy/scripts/rollback.sh。"
   echo "建议至少支持按镜像标签回滚，并在部署文档中写清验证步骤。"
+  echo "建议使用 Git Commit SHA 或语义化版本号作为镜像 tag，不建议使用 latest。"
   echo "如果项目包含数据库迁移、副作用任务或静态资源发布，也必须写清回滚边界。"
+  exit 1
+fi
+
+if [[ "$ROLLBACK_IMAGE" =~ :latest$ ]]; then
+  echo "ROLLBACK_IMAGE 不能是 latest。请显式指定可回溯的镜像版本。"
   exit 1
 fi
 
@@ -20,4 +26,5 @@ docker compose \
   --env-file "$PROD_ENV_FILE" \
   up -d "$SERVICE_NAME"
 
-echo "已执行回滚命令。项目接入时请补充回滚后健康检查与版本确认步骤。"
+echo "已执行回滚命令：$ROLLBACK_IMAGE"
+echo "项目接入时请补充回滚后健康检查与版本确认步骤。"

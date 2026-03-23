@@ -126,6 +126,13 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 
 这些子命令的定位应当是“补充说明具体环节”，而不是替代统一顶层入口。
 
+回滚版本语义建议：
+
+- 生产发布应优先使用不可变版本标识
+- 容器镜像优先使用 Git Commit SHA 或语义化版本号作为 tag
+- 不建议把 `latest` 作为生产发布和回滚依据
+- `make rollback` 应显式回滚到某个具体版本，而不是“回到当前默认镜像”
+
 ### 适用场景
 
 - 需要为多个项目统一部署约定
@@ -256,6 +263,13 @@ If a project has multiple sub-apps or separate release tracks, it may also add n
 - `make seed`
 
 These subcommands should clarify specific steps, not replace the shared top-level contract.
+
+Rollback version semantics:
+
+- production releases should prefer immutable version identifiers
+- container images should prefer Git commit SHA or semantic version tags
+- `latest` should not be used as the production release or rollback reference
+- `make rollback` should target an explicit version, not an implicit default image
 
 ### Good Fit For
 

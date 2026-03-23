@@ -55,4 +55,11 @@
 
 - `DEPLOY_SSH_PORT`
 
+版本与回滚建议：
+
+- `APP_IMAGE` 不应长期保留 `latest` 风格
+- 正式接入时，建议改为 `your-image:<git-sha>` 或 `your-image:<semver>`
+- `make rollback` 应显式指定要回滚到的镜像版本
+- 部署文档中必须写清镜像 tag 规则和回滚验证方式
+
 模板不会替你决定项目技术栈，只负责提供统一工程接口。
