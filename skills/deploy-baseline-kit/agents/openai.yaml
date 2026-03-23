@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deploy Baseline Kit"
+  short_description: "Generate or normalize deployment baselines"
+  default_prompt: "Use $deploy-baseline-kit to inspect this project and propose a deployment-baseline generation or normalization plan before editing files."

@@ -28,6 +28,7 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 
 - `docs/baseline-standard.md`：通用基线规范
 - `docs/deployment-sop.md`：通用部署 SOP
+- `skills/deploy-baseline-kit/`：用于识别项目并生成/收敛部署基线的 Codex skill
 - `template/`：可复制到新项目中的模板骨架
 - `template/deploy/`：部署目录、示例环境变量和脚本
 - `template/scripts/`：本地开发、构建、测试等脚本占位
@@ -51,6 +52,33 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 5. 明确目标项目采用的本地运行模式与服务发布拆分方式
 6. 按目标项目情况补齐 `deploy/README.md`、环境变量和脚本实现
 7. 基于本仓库的 SOP 生成该项目自己的部署规范
+
+### Codex Skill
+
+仓库内提供了一个主 skill：`deploy-baseline-kit`。
+
+它适用于以下场景：
+
+- 从空目录或近似空目录生成部署基线骨架
+- 对已有项目做部署基线识别、差距分析和结构收敛
+- 自动判断项目根目录、运行模式和数据库类型
+- 在一次确认后完成生成或改造，而不是逐文件反复确认
+
+这个 skill 的主入口在 `skills/deploy-baseline-kit/SKILL.md`，设计说明在 `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`。
+
+推荐用法：
+
+1. 在目标项目根目录或其子目录中运行 Codex
+2. 显式调用 `deploy-baseline-kit`
+3. 先查看 skill 输出的识别结果和改造方案
+4. 确认后再让它执行实际文件修改
+
+如果要让本地 Codex 自动发现这个 skill，可将 `skills/deploy-baseline-kit/` 安装或链接到 `~/.codex/skills/deploy-baseline-kit`，然后重启 Codex。
+
+手工使用 `template/` 和使用 `deploy-baseline-kit` 并不冲突：
+
+- `template/` 适合手工复制和定制
+- `deploy-baseline-kit` 适合让 Codex 自动分析并生成/改造目标项目
 
 ### 统一命令约定
 
@@ -98,6 +126,7 @@ The baseline reflects patterns proven in real delivery work, including:
 
 - `docs/baseline-standard.md`: baseline standards and conventions
 - `docs/deployment-sop.md`: generic deployment SOP
+- `skills/deploy-baseline-kit/`: Codex skill for generating or converging projects onto this deployment baseline
 - `template/`: copyable project skeleton
 - `template/deploy/`: deployment scripts, env examples, and deployment docs
 - `template/scripts/`: placeholders for local development, build, and test scripts
@@ -121,6 +150,33 @@ The template does not choose your application stack. It only provides a consiste
 5. Decide the local runtime model and deployment split for the target project
 6. Fill in `deploy/README.md`, environment files, and script implementations
 7. Derive a project-specific deployment standard from this baseline
+
+### Codex Skill
+
+This repository also ships one primary skill: `deploy-baseline-kit`.
+
+Use it when you want Codex to:
+
+- generate a deployment baseline from an empty or near-empty directory
+- inspect an existing project and converge it toward this baseline
+- infer the real project root, runtime mode, and database type
+- present one plan first, then apply changes after a single confirmation
+
+The main entry is `skills/deploy-baseline-kit/SKILL.md`, and the design spec lives at `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`.
+
+Recommended usage:
+
+1. Run Codex from the target project root or any child directory
+2. Explicitly invoke `deploy-baseline-kit`
+3. Review the detected state and proposed transformation plan
+4. Confirm once, then let the skill apply the file changes
+
+To make the skill auto-discoverable for a local Codex installation, install or symlink `skills/deploy-baseline-kit/` into `~/.codex/skills/deploy-baseline-kit`, then restart Codex.
+
+Manual use of `template/` and automated use of `deploy-baseline-kit` are complementary:
+
+- `template/` is the direct copy-and-customize path
+- `deploy-baseline-kit` is the analyze-and-generate or analyze-and-converge path
 
 ### Standard Command Contract
 
