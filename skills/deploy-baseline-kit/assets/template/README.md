@@ -18,11 +18,41 @@
 - 本地脚本目录
 - 部署脚本目录
 - 中文部署文档模板
+- GitHub Actions 工作流模板
 
 使用要求：
 
 - 不要在没定义运行模式前直接套模板
 - 不要默认所有服务都用同一条部署链路
 - 必须把启动契约、健康检查、回滚边界写清楚
+
+模板里的 `Makefile` 默认提供两层命令：
+
+- 顶层统一入口：`make dev`、`make build`、`make test`、`make deploy`、`make rollback`、`make logs`
+- 常见辅助入口：`make help`、`make setup`、`make init`、`make up`、`make down`、`make deploy-check`、`make prod-up`、`make prod-down`、`make prod-logs`、`make db-up`、`make db-down`、`make db-shell`
+
+建议先把顶层统一入口的语义定义清楚，再决定哪些辅助命令需要保留、裁剪或扩展。
+
+模板里的 GitHub Actions 默认提供：
+
+- `.github/workflows/ci.yml`：执行 `make build` / `make test`
+- `.github/workflows/deploy.yml`：在 `push main` 时尝试自动部署
+
+其中 `deploy.yml` 默认带“静默跳过”门槛：
+
+- 如果未配置部署所需 Secrets，workflow 会给出 warning 并跳过部署
+- 不会因为新项目尚未配置远端环境而直接报错失败
+
+默认要求的 Secrets 包括：
+
+- `DEPLOY_HOST`
+- `DEPLOY_USER`
+- `DEPLOY_PATH`
+- `SSH_PRIVATE_KEY`
+- `APP_PROD_ENV`
+
+可选项：
+
+- `DEPLOY_SSH_PORT`
 
 模板不会替你决定项目技术栈，只负责提供统一工程接口。

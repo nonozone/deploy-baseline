@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Build Readiness
+        id: build_ready
+        run: |
+          if grep -Fq "请在 scripts/build.sh 中接入项目实际构建命令。" scripts/build.sh; then
+            echo "::warning ::scripts/build.sh 仍是模板占位实现，已跳过 make build。"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check Test Readiness
+        id: test_ready
+        run: |
+          if grep -Fq "请在 scripts/test.sh 中接入项目实际测试命令。" scripts/test.sh; then
+            echo "::warning ::scripts/test.sh 仍是模板占位实现，已跳过 make test。"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Build
+        if: steps.build_ready.outputs.ready == 'true'
+        run: make build
+
+      - name: Run Test
+        if: steps.test_ready.outputs.ready == 'true'
+        run: make test

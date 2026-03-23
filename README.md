@@ -41,6 +41,7 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 - 本地脚本目录
 - 部署脚本目录
 - 中文部署文档模板
+- GitHub Actions 工作流模板
 
 模板不会替你决定业务技术栈，只负责提供统一工程接口与部署骨架。
 
@@ -171,6 +172,7 @@ The baseline reflects patterns proven in real delivery work, including:
 - local script directories
 - deployment script directories
 - deployment documentation templates
+- GitHub Actions workflow templates
 
 The template does not choose your application stack. It only provides a consistent engineering interface and deployment skeleton.
 
