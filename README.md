@@ -77,6 +77,14 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 
 如果要让本地 Codex 自动发现这个 skill，可将 `skills/deploy-baseline-kit/` 安装或链接到 `~/.codex/skills/deploy-baseline-kit`，然后重启 Codex。
 
+如果本地 Codex 使用的是软链接方式安装，例如：
+
+- `~/.codex/skills/deploy-baseline-kit -> /path/to/deploy-baseline/skills/deploy-baseline-kit`
+
+那么后续只需要更新仓库里的 `skills/deploy-baseline-kit/`，本地安装目录就会自动跟随更新。通常只需要重启 Codex 或开启新会话，就能让新版本 skill 生效。
+
+如果本地 Codex 使用的是直接复制安装，而不是软链接，那么每次更新仓库里的 skill 后，还需要手动把最新版本再次复制到 `~/.codex/skills/deploy-baseline-kit`。
+
 当前更稳定、支持最完整的路线是 PostgreSQL 项目；其他数据库类型已经纳入设计，但仍以真实项目需求和后续验证为主。
 
 手工使用 `template/` 和使用 `deploy-baseline-kit` 并不冲突：
@@ -214,6 +222,14 @@ Recommended usage:
 4. Confirm once, then let the skill apply the file changes
 
 To make the skill auto-discoverable for a local Codex installation, install or symlink `skills/deploy-baseline-kit/` into `~/.codex/skills/deploy-baseline-kit`, then restart Codex.
+
+If the local Codex installation uses a symlink, for example:
+
+- `~/.codex/skills/deploy-baseline-kit -> /path/to/deploy-baseline/skills/deploy-baseline-kit`
+
+then updating the repository copy under `skills/deploy-baseline-kit/` is enough. The local skill will follow automatically, and a Codex restart or a new session is usually enough to pick up the new version.
+
+If the local Codex installation uses a copied directory instead of a symlink, you must manually copy the updated skill into `~/.codex/skills/deploy-baseline-kit` after repository updates.
 
 The most stable and complete path today is PostgreSQL-based projects; other database families are designed for but still need more real-project validation.
 
