@@ -93,6 +93,35 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 
 项目可以扩展自己的子命令，但不应破坏这组统一入口。
 
+建议为这些顶层命令赋予稳定语义：
+
+- `make dev`：项目默认开发入口。负责启动标准开发环境；在全量 Docker 模式下通常拉起完整开发栈，在混合开发模式下至少拉起容器侧依赖，并明确本地还需启动哪些进程。
+- `make build`：项目级默认构建入口。负责生成项目默认交付物，例如应用镜像、后端构建产物或前端静态资源。
+- `make test`：项目级默认测试入口。负责执行项目的默认测试集合，而不是只跑某个子模块的局部测试。
+- `make deploy`：标准发布入口。负责执行该项目纳入统一发布链路的服务部署。
+- `make rollback`：标准回滚入口。负责回滚到项目约定的上一个有效发布单元，例如镜像标签、制品版本或 Git 版本。
+- `make logs`：默认日志查看入口。负责查看项目主要应用服务的运行日志，而不是要求使用者先记住具体容器名。
+
+除了顶层入口，项目也可以保留一组常见辅助命令，方便用户发现和单独执行某个环节：
+
+- `make help`：显示所有可用命令与简要说明，建议作为命令发现入口。
+- `make setup`：初始化本地开发环境依赖。
+- `make init`：首次初始化入口，通常可复用 `setup`。
+- `make up` / `make down`：单独启动或停止开发态容器。
+- `make deploy-check`：执行部署前检查，例如 Docker、Compose、环境文件、关键变量和挂载策略检查。
+- `make prod-up` / `make prod-down` / `make prod-logs`：面向生产态容器的兼容或显式操作入口。
+- `make db-up` / `make db-down` / `make db-shell`：面向数据库容器的辅助入口。
+
+如果项目包含多个子应用或独立子链路，也可以扩展更细的子命令，例如：
+
+- `make build-admin`
+- `make build-web`
+- `make test-backend`
+- `make migrate`
+- `make seed`
+
+这些子命令的定位应当是“补充说明具体环节”，而不是替代统一顶层入口。
+
 ### 适用场景
 
 - 需要为多个项目统一部署约定
@@ -190,6 +219,35 @@ Projects are encouraged to keep these top-level commands:
 - `make logs`
 
 Projects may extend the command set, but should preserve this common entry surface.
+
+These top-level commands should keep stable meanings across projects:
+
+- `make dev`: the default local development entry. In full Docker mode it usually starts the full dev stack; in hybrid mode it should at least start containerized dependencies and make the remaining local processes explicit.
+- `make build`: the project-wide default build entry. It should produce the default deliverable, such as an app image, backend artifact, or frontend static bundle.
+- `make test`: the project-wide default test entry. It should run the default test surface for the project, not just one narrow submodule.
+- `make deploy`: the standard release entry for services that belong to the project's unified deployment path.
+- `make rollback`: the standard rollback entry for the project's rollback unit, such as an image tag, artifact version, or Git revision.
+- `make logs`: the default log-viewing entry for the main application service, so users do not need to memorize container names first.
+
+Projects can also expose common helper commands so users can discover and run one step in isolation when needed:
+
+- `make help`: list available commands and short descriptions; this should be the command discovery entry.
+- `make setup`: initialize local development prerequisites.
+- `make init`: first-time initialization entry, often reusing `setup`.
+- `make up` / `make down`: start or stop development containers without running the full `dev` flow.
+- `make deploy-check`: run pre-deployment checks for Docker, Compose, env files, critical variables, and persistence settings.
+- `make prod-up` / `make prod-down` / `make prod-logs`: explicit or compatibility production-container operations.
+- `make db-up` / `make db-down` / `make db-shell`: helper commands for database container operations.
+
+If a project has multiple sub-apps or separate release tracks, it may also add narrower commands such as:
+
+- `make build-admin`
+- `make build-web`
+- `make test-backend`
+- `make migrate`
+- `make seed`
+
+These subcommands should clarify specific steps, not replace the shared top-level contract.
 
 ### Good Fit For
 

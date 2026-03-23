@@ -25,4 +25,11 @@
 - 不要默认所有服务都用同一条部署链路
 - 必须把启动契约、健康检查、回滚边界写清楚
 
+模板里的 `Makefile` 默认提供两层命令：
+
+- 顶层统一入口：`make dev`、`make build`、`make test`、`make deploy`、`make rollback`、`make logs`
+- 常见辅助入口：`make help`、`make setup`、`make init`、`make up`、`make down`、`make deploy-check`、`make prod-up`、`make prod-down`、`make prod-logs`、`make db-up`、`make db-down`、`make db-shell`
+
+建议先把顶层统一入口的语义定义清楚，再决定哪些辅助命令需要保留、裁剪或扩展。
+
 模板不会替你决定项目技术栈，只负责提供统一工程接口。
