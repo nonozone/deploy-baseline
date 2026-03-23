@@ -28,6 +28,7 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 
 - `docs/baseline-standard.md`：通用基线规范
 - `docs/deployment-sop.md`：通用部署 SOP
+- `docs/deploy-baseline-kit.md`：`deploy-baseline-kit` 的实际行为边界与稳定支持范围说明
 - `skills/deploy-baseline-kit/`：用于识别项目并生成/收敛部署基线的 Codex skill
 - `template/`：可复制到新项目中的模板骨架
 - `template/deploy/`：部署目录、示例环境变量和脚本
@@ -64,7 +65,7 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 - 自动判断项目根目录、运行模式和数据库类型
 - 在一次确认后完成生成或改造，而不是逐文件反复确认
 
-这个 skill 的主入口在 `skills/deploy-baseline-kit/SKILL.md`，设计说明在 `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`。
+这个 skill 的主入口在 `skills/deploy-baseline-kit/SKILL.md`，设计说明在 `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`，行为边界说明在 `docs/deploy-baseline-kit.md`。
 
 推荐用法：
 
@@ -74,6 +75,8 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 4. 确认后再让它执行实际文件修改
 
 如果要让本地 Codex 自动发现这个 skill，可将 `skills/deploy-baseline-kit/` 安装或链接到 `~/.codex/skills/deploy-baseline-kit`，然后重启 Codex。
+
+当前更稳定、支持最完整的路线是 PostgreSQL 项目；其他数据库类型已经纳入设计，但仍以真实项目需求和后续验证为主。
 
 手工使用 `template/` 和使用 `deploy-baseline-kit` 并不冲突：
 
@@ -155,6 +158,7 @@ The baseline reflects patterns proven in real delivery work, including:
 
 - `docs/baseline-standard.md`: baseline standards and conventions
 - `docs/deployment-sop.md`: generic deployment SOP
+- `docs/deploy-baseline-kit.md`: behavior boundaries and stability notes for `deploy-baseline-kit`
 - `skills/deploy-baseline-kit/`: Codex skill for generating or converging projects onto this deployment baseline
 - `template/`: copyable project skeleton
 - `template/deploy/`: deployment scripts, env examples, and deployment docs
@@ -191,7 +195,7 @@ Use it when you want Codex to:
 - infer the real project root, runtime mode, and database type
 - present one plan first, then apply changes after a single confirmation
 
-The main entry is `skills/deploy-baseline-kit/SKILL.md`, and the design spec lives at `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`.
+The main entry is `skills/deploy-baseline-kit/SKILL.md`, the design spec lives at `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`, and the runtime behavior notes live at `docs/deploy-baseline-kit.md`.
 
 Recommended usage:
 
@@ -201,6 +205,8 @@ Recommended usage:
 4. Confirm once, then let the skill apply the file changes
 
 To make the skill auto-discoverable for a local Codex installation, install or symlink `skills/deploy-baseline-kit/` into `~/.codex/skills/deploy-baseline-kit`, then restart Codex.
+
+The most stable and complete path today is PostgreSQL-based projects; other database families are designed for but still need more real-project validation.
 
 Manual use of `template/` and automated use of `deploy-baseline-kit` are complementary:
 
