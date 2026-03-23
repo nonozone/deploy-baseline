@@ -1,10 +1,10 @@
-# Deployment Baseline Kit
+# Deploy Baseline
 
 [中文](#中文说明) | [English](#english)
 
-一个可迁移的容器部署与 `Make` 通用基线包，用于在不同项目之间复用一致的开发、构建、测试与部署入口。
+部署基线：一套可迁移的容器部署与 `Make` 通用基线，用于在不同项目之间复用一致的开发、构建、测试与部署入口。
 
-This repository is a reusable deployment baseline for containerized projects. It provides a consistent `Make`-based interface, layered Docker Compose structure, deployment SOPs, and a copyable project template.
+Deploy Baseline is a reusable deployment baseline for containerized projects. It provides a consistent `Make`-based interface, layered Docker Compose structure, deployment SOPs, and a copyable project template.
 
 ## 中文说明
 
@@ -74,7 +74,7 @@ This repository is a reusable deployment baseline for containerized projects. It
 
 ### 开源协议
 
-本项目使用 `Apache-2.0` 协议。你可以在遵守协议的前提下自由使用、修改和分发。
+部署基线使用 `Apache-2.0` 协议。你可以在遵守协议的前提下自由使用、修改和分发。
 
 ## English
 
