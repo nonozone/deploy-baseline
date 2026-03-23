@@ -93,6 +93,21 @@ make deploy
 - 启动契约变量有哪些
 - 什么条件下可以认为发布完成
 
+建议至少覆盖：
+
+- `WAIT_FOR_DB`
+- `RUN_DB_MIGRATIONS`
+- `DB_WAIT_TIMEOUT`
+- `APP_INTERNAL_PORT`
+- `APP_HEALTHCHECK_PATH`
+- `APP_HEALTHCHECK_TIMEOUT`
+
+推荐默认约定：
+
+- 健康检查路径使用 `/health`
+- 成功标准为返回 `200`
+- 发布完成至少要求应用容器进入 healthy 状态
+
 ## 10. 日志与健康检查
 
 建议至少写清：
@@ -101,6 +116,12 @@ make deploy
 - 使用什么命令
 - 健康检查接口是什么
 - 发布完成后如何确认服务可用
+
+如果沿用模板默认约定，建议明确说明：
+
+- 应用容器健康检查依赖 `/health`
+- `make deploy` 执行后会等待应用进入 healthy 状态
+- 如果超时或 unhealthy，应先查看应用日志再继续排查
 
 ## 11. 回滚流程
 

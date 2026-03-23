@@ -303,13 +303,22 @@ project-root/
 - 服务健康检查
 - 服务何时算 ready
 - 数据库依赖就绪条件
+- 发布完成判定标准
 
 建议：
 
 - `db` 服务配置健康检查
 - 应用服务依赖 `service_healthy`
 - 应用服务提供自身健康检查
+- 应用服务默认提供 `/health` 健康检查接口，返回成功状态码
+- `make deploy` 执行后，应存在明确的健康等待或发布完成判定逻辑
 - 部署文档中写清发布后如何验证服务可用
+
+推荐默认约定：
+
+- 健康检查路径：`/health`
+- 健康检查成功标准：返回 `200`
+- 发布完成判定：应用容器进入 healthy 状态，且关键服务可访问
 
 ### 6.7 状态型服务自检
 
@@ -366,6 +375,8 @@ project-root/
 - `RUN_DB_MIGRATIONS`
 - `DB_WAIT_TIMEOUT`
 - `APP_INTERNAL_PORT`
+- `APP_HEALTHCHECK_PATH`
+- `APP_HEALTHCHECK_TIMEOUT`
 
 要求：
 
@@ -427,6 +438,7 @@ project-root/
 - 应负责纳入统一发布链路的服务部署
 - 如果部分服务不归它管理，必须在部署文档中说明真实发布方式
 - 不能出现“命令名统一了，但实际没人知道它部署了什么”的情况
+- 执行后应有明确的发布完成判定，例如等待容器 healthy、检查 `/health` 或执行等价探针
 
 #### `make rollback`
 

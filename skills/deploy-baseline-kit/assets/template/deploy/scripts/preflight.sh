@@ -50,10 +50,16 @@ fi
 
 require_env "APP_IMAGE"
 require_env "APP_PUBLISH_PORT"
+require_env "APP_INTERNAL_PORT"
 require_env "DB_PASSWORD"
 
 reject_placeholder '^APP_IMAGE=sampleapp:latest$' "APP_IMAGE 仍是模板默认值，请替换为项目实际镜像。"
 reject_placeholder '^DB_PASSWORD=change-me(-in-production)?$' "DB_PASSWORD 仍是模板占位值，请替换为真实配置。"
+
+if ! grep -Eq 'healthcheck:' "$ROOT_DIR/docker-compose.prod.yml"; then
+  echo "生产 Compose 缺少 healthcheck 配置。"
+  exit 1
+fi
 
 if ! grep -Eq '请替换为项目实际(生产启动命令|镜像构建逻辑)' "$ROOT_DIR/Dockerfile" "$ROOT_DIR/docker-compose.prod.yml"; then
   :
