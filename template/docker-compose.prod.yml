@@ -29,6 +29,9 @@ services:
       APP_ENV: production
       DB_HOST: db
       DB_PORT: 5432
+      WAIT_FOR_DB: ${WAIT_FOR_DB:-true}
+      RUN_DB_MIGRATIONS: ${RUN_DB_MIGRATIONS:-false}
+      DB_WAIT_TIMEOUT: ${DB_WAIT_TIMEOUT:-60}
     depends_on:
       db:
         condition: service_healthy
@@ -38,6 +41,11 @@ services:
       - sh
       - -c
       - echo 请替换为项目实际生产启动命令 && sleep infinity
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8000/health >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata_prod:

@@ -9,6 +9,10 @@ ENV_FILE ?= .env
 PROD_ENV_FILE ?= deploy/env/app.prod.env
 APP_SERVICE ?= app
 DB_SERVICE ?= db
+# 允许项目选择开发模式：
+# docker = 全部通过 Compose 启动
+# mixed  = 只启动 Docker 侧依赖或部分服务，其余服务本地运行
+LOCAL_RUNTIME_MODE ?= docker
 
 COMPOSE_BASE = docker compose -f docker-compose.yml --env-file $(ENV_FILE)
 COMPOSE_DEV = docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file $(ENV_FILE)
