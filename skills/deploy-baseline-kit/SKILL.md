@@ -25,7 +25,8 @@ Keep the user interaction simple: analyze first, ask once, then execute.
    - risk summary
 5. Ask for one confirmation only.
 6. After confirmation, execute the plan without per-file follow-up questions.
-7. Report what changed, what still deviates, and any project-specific carryovers.
+7. Run post-edit verification for deployment assets and command surface.
+8. Report what changed, what still deviates, and any project-specific carryovers.
 
 ## Confirmation Gate
 
@@ -44,6 +45,11 @@ Do not ask again after the user confirms.
 - Use the bundled template as the default skeleton for new files.
 - Adapt the template instead of copying it blindly when the project already has meaningful deployment logic.
 - Generate deployment docs from the baseline SOP plus project-specific facts discovered during scanning.
+- Do not stop at file generation. Always verify the resulting deployment surface.
+- Prefer additive or merge-style edits for existing system-facing config such as reverse proxies or service units.
+- Keep env examples grouped by concern and clearly separate local or dev files from production files.
+- Always state the rollback unit: git ref, image tag, or manual restore.
+- If database migrations exist, document rollback boundaries explicitly instead of implying full reversibility.
 
 ## References
 
@@ -53,6 +59,21 @@ Do not ask again after the user confirms.
 - Read [database-variants.md](references/database-variants.md) to detect PostgreSQL, MySQL, MariaDB, MongoDB, external databases, or unknown database setups.
 - Read [transformation-rules.md](references/transformation-rules.md) before editing files.
 - Read [document-generation.md](references/document-generation.md) when generating or rewriting `deploy/README.md` or baseline notes.
+- Read [verification.md](references/verification.md) after edits to verify Compose, scripts, command surface, and project build or test health.
+
+## Required Planning Output
+
+Before confirmation, always include:
+
+- root path
+- project classification
+- deployment mode
+- database type and persistence mode
+- current assets
+- missing baseline pieces
+- recommended path
+- highest-risk edits
+- verification plan
 
 ## Bundled Resources
 

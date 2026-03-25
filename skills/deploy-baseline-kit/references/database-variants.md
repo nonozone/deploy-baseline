@@ -32,6 +32,21 @@ For existing projects:
 - do not auto-upgrade blindly
 - decide whether to keep the current version, recommend upgrade, or change after confirmation
 
+### PostgreSQL major-version caveats
+
+Check for version-specific deployment differences before converging compose mounts or docs.
+
+Examples:
+
+- PostgreSQL 18 image behavior around `VOLUME /var/lib/postgresql`
+- whether `PGDATA` must be set explicitly
+- whether old mount paths such as `/var/lib/postgresql/data` should be replaced with `/var/lib/postgresql`
+
+For existing projects:
+
+- do not blindly preserve old mount targets when the project already upgraded major PostgreSQL versions
+- verify persistence strategy with `docker compose config` and document the chosen path
+
 ### MySQL or MariaDB
 
 Signals:
@@ -44,6 +59,11 @@ Action:
 - keep the same family unless the project explicitly indicates otherwise
 - adapt env examples, healthchecks, volumes, and docs to that family
 
+Version caveats:
+
+- check for major-version authentication plugin differences
+- verify any image-specific startup flags before converging compose
+
 ### MongoDB
 
 Signals:
@@ -54,6 +74,10 @@ Signals:
 Action:
 
 - do not force SQL-oriented env naming or healthcheck wording onto the project
+
+Version caveats:
+
+- verify major-version startup flag differences before changing command or persistence options
 
 ### External database
 

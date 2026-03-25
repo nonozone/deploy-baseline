@@ -78,6 +78,37 @@
 - 每个 target 必须带中文说明
 - 必须提供 `make help`
 
+### 3.7 最低验证面必须存在
+
+部署基线不应停留在“文件生成完成”，而应至少具备一层最小验证能力。
+
+建议最低覆盖：
+
+- shell 脚本语法检查
+- Compose 展开检查
+- 命令面检查
+- 项目已有 `build/test/typecheck` 的健康检查
+- 生产部署相关 `healthcheck` 与 env file 引用检查
+
+如果环境限制导致无法执行完整验证，也必须在文档或输出结果中明确说明。
+
+### 3.8 系统级配置默认保护
+
+部署基线允许收敛已有项目，但对系统级配置默认应采用保护策略。
+
+例如：
+
+- `Caddyfile`
+- `nginx.conf`
+- systemd unit files
+- CI/CD workflow
+
+原则：
+
+- 默认 merge、追加、局部编辑
+- 不直接整文件覆盖
+- 只有在明确选择强制收敛时，才允许整体替换
+
 ### 3.4 文档与模板分离
 
 规范文档负责定义标准，模板负责提供默认实现。
@@ -191,9 +222,17 @@ project-root/
 
 负责本地开发变量示例，不放真实敏感信息。
 
+建议按关注点分组，例如 project/runtime、database、ports、auth/secrets。
+
 ### 5.6 `deploy/env/*.example`
 
 负责部署阶段变量示例，强调部署变量与本地开发变量分层管理。
+
+建议：
+
+- 明确区分必填、可选与 provider-specific 变量
+- 不要混用空值、`replace-me` 与近似真实值而不加说明
+- 对状态型服务和验证相关变量单独分组
 
 ### 5.7 `scripts/`
 
@@ -334,6 +373,18 @@ project-root/
 
 - `scripts/*.sh`
 - `deploy/scripts/*.sh`
+
+### 6.8 状态型服务版本陷阱需要文档化
+
+对于数据库、缓存、消息队列等状态型服务，除了识别“类型”，还应注意版本差异带来的部署陷阱。
+
+例如：
+
+- PostgreSQL major version 的数据目录和挂载策略差异
+- MySQL major version 的认证插件差异
+- Mongo major version 的启动参数差异
+
+如果项目命中了这类差异，应在部署文档中明确写出，而不是默认沿用旧配置。
 
 ## 7. 环境变量规则
 

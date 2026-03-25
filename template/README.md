@@ -25,6 +25,8 @@
 - 不要在没定义运行模式前直接套模板
 - 不要默认所有服务都用同一条部署链路
 - 必须把启动契约、健康检查、回滚边界写清楚
+- 必须在接入后执行最低验证面，而不是只生成文件
+- 默认不要整文件覆盖系统级配置，例如反向代理、systemd、CI/CD 文件
 
 模板里的 `Makefile` 默认提供两层命令：
 
@@ -61,5 +63,11 @@
 - 正式接入时，建议改为 `your-image:<git-sha>` 或 `your-image:<semver>`
 - `make rollback` 应显式指定要回滚到的镜像版本
 - 部署文档中必须写清镜像 tag 规则和回滚验证方式
+
+env 模板建议：
+
+- 按 project/runtime、database、publish ports、auth/secrets、provider-specific、observability/verification 分组
+- `.env.example` 面向本地开发
+- `deploy/env/*.env.example` 面向部署运行时
 
 模板不会替你决定项目技术栈，只负责提供统一工程接口。

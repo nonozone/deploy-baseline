@@ -68,6 +68,13 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 
 这个 skill 的主入口在 `skills/deploy-baseline-kit/SKILL.md`，设计说明在 `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`，行为边界说明在 `docs/deploy-baseline-kit.md`。
 
+当前这套 skill 的增强重点包括：
+
+- 改造后必须执行最低验证面，而不是只生成文件
+- 对反向代理、systemd、CI/CD 等系统级配置默认采用 merge 或追加策略
+- PostgreSQL 路线当前最稳定，其他数据库类型已纳入设计但仍待更多真实项目验证
+- env 模板要求按关注点分组，并明确区分本地开发与生产部署
+
 推荐用法：
 
 1. 在目标项目根目录或其子目录中运行 Codex
@@ -86,6 +93,14 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 如果本地 Codex 使用的是直接复制安装，而不是软链接，那么每次更新仓库里的 skill 后，还需要手动把最新版本再次复制到 `~/.codex/skills/deploy-baseline-kit`。
 
 当前更稳定、支持最完整的路线是 PostgreSQL 项目；其他数据库类型已经纳入设计，但仍以真实项目需求和后续验证为主。
+
+建议的最低验证面至少包括：
+
+- `bash -n` 检查新增或修改过的 shell 脚本
+- `docker compose config` 检查 Compose 展开结果
+- `make help` 检查命令面
+- 如果项目已有 `build/test/typecheck`，则执行它们
+- 检查生产 Compose 的 `healthcheck`、env file 和回滚边界说明
 
 手工使用 `template/` 和使用 `deploy-baseline-kit` 并不冲突：
 
@@ -214,6 +229,13 @@ Use it when you want Codex to:
 
 The main entry is `skills/deploy-baseline-kit/SKILL.md`, the design spec lives at `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`, and the runtime behavior notes live at `docs/deploy-baseline-kit.md`.
 
+The current enhancement focus for this skill is:
+
+- enforce post-edit verification instead of stopping at file generation
+- protect system-facing config such as reverse proxies, service units, and CI/CD files by defaulting to merge-style edits
+- treat PostgreSQL as the most mature path today while keeping other database families as designed-but-still-validating paths
+- keep env templates grouped by concern and clearly separated between local development and production deployment
+
 Recommended usage:
 
 1. Run Codex from the target project root or any child directory
@@ -232,6 +254,14 @@ then updating the repository copy under `skills/deploy-baseline-kit/` is enough.
 If the local Codex installation uses a copied directory instead of a symlink, you must manually copy the updated skill into `~/.codex/skills/deploy-baseline-kit` after repository updates.
 
 The most stable and complete path today is PostgreSQL-based projects; other database families are designed for but still need more real-project validation.
+
+The recommended minimum verification surface includes:
+
+- `bash -n` for new or modified shell scripts
+- `docker compose config` for Compose expansion
+- `make help` for command-surface validation
+- existing `build/test/typecheck` commands when the repo already has them
+- production Compose `healthcheck`, env file, and rollback-boundary checks
 
 Manual use of `template/` and automated use of `deploy-baseline-kit` are complementary:
 

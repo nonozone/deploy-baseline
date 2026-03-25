@@ -26,6 +26,8 @@ Include:
 11. rollback flow
 12. common troubleshooting
 13. project-specific notes
+14. persistence and volume notes
+15. provider-specific caveats
 
 ## Source of truth
 
@@ -36,3 +38,10 @@ Use:
 - facts discovered in the target project
 
 Do not leave the document as generic template prose when the project already exposes concrete ports, services, or commands.
+
+When the project uses stateful containers, explicitly document:
+
+- named volumes used
+- bind mounts used
+- any major-version-specific storage caveats
+- backup caution before changing mount targets
