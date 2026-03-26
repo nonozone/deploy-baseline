@@ -1,0 +1,5 @@
+services:
+  app:
+    image: example/app:prod
+  db:
+    image: postgres:17-alpine
