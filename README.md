@@ -34,6 +34,9 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 - `template/`：可复制到新项目中的模板骨架
 - `template/deploy/`：部署目录、示例环境变量和脚本
 - `template/scripts/`：本地开发、构建、测试等脚本占位
+- `fixtures/`：静态样板目录，用于记录项目分类、运行模式、推荐路径元信息，并支撑基础验证命令；`runnable/` 子目录则预留给未来可执行样板验证。
+
+`fixtures/` 记录候选项目形态的差异、期望模式和建议路径，仓库级别的验证命令将覆盖这些元信息，同时该层结构也为后续的 runnable/ 可执行样板提供承载空间。
 
 ### 模板默认提供
 
@@ -197,6 +200,9 @@ The baseline reflects patterns proven in real delivery work, including:
 - `template/`: copyable project skeleton
 - `template/deploy/`: deployment scripts, env examples, and deployment docs
 - `template/scripts/`: placeholders for local development, build, and test scripts
+- `fixtures/`: static fixture descriptions that anchor classification metadata ahead of runnable assets, with a `runnable/` subtree reserved for the future executable fixtures.
+
+`fixtures/` stores static descriptions of candidate project shapes, their expected runtime modes, and the guidance the baseline should provide; repo-level verification commands will cover this area to keep the metadata and layout consistent while leaving space for the `runnable/` subtree to house executable fixtures later.
 
 ### What The Template Includes
 
