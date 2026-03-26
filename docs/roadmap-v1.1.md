@@ -27,6 +27,8 @@
 
 ## 3. 版本目标
 
+Phase 1 scaffolding and static fixture validation is the active first slice for `v1.1`. This stage establishes the fixture taxonomy, the static metadata contract, and the repo-level verification commands described in this plan before we advance to runnable fixtures or extra verification layers. Phase 1 的脚手架搭建与静态样板验证成为 `v1.1` 当前的首个落地片段，为后续 runnable 样板与更复杂的验证层铺好基础。
+
 `v1.1` 建议聚焦三件事：
 
 1. 提升可信度：让基线和 skill 在多个真实项目形态下可重复验证

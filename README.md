@@ -38,6 +38,10 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 
 `fixtures/` 记录候选项目形态的差异、期望模式和建议路径，仓库级别的验证命令将覆盖这些元信息，同时该层结构也为后续的 runnable/ 可执行样板提供承载空间。
 
+### 验证命令
+- `make verify-fixtures-static`：当前 Phase 1 只覆盖静态样板验证，命令会检查 `fixtures/` 下每个 `fixture.md` 是否满足预期字段。
+- `make verify-baseline`：统一的基础验证入口，目前只是执行静态样板检查，用于为将来的其它层级验证提供挂钩点。
+
 ### 模板默认提供
 
 - 标准 `Makefile`
@@ -203,6 +207,10 @@ The baseline reflects patterns proven in real delivery work, including:
 - `fixtures/`: static fixture descriptions that anchor classification metadata ahead of runnable assets, with a `runnable/` subtree reserved for the future executable fixtures.
 
 `fixtures/` stores static descriptions of candidate project shapes, their expected runtime modes, and the guidance the baseline should provide; repo-level verification commands will cover this area to keep the metadata and layout consistent while leaving space for the `runnable/` subtree to house executable fixtures later.
+
+### Verification Commands
+- `make verify-fixtures-static`: Phase 1 currently focuses solely on static fixture metadata validation, ensuring each `fixture.md` under `fixtures/` advertises the required fields.
+- `make verify-baseline`: The repository-level verification entry point that today delegates to the static fixture check but is ready to layer additional baseline checks once later phases expand the slice.
 
 ### What The Template Includes
 
