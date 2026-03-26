@@ -29,6 +29,7 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 - `docs/baseline-standard.md`：通用基线规范
 - `docs/deployment-sop.md`：通用部署 SOP
 - `docs/deploy-baseline-kit.md`：`deploy-baseline-kit` 的实际行为边界与稳定支持范围说明
+- `docs/roadmap-v1.1.md`：下一阶段的优化方向、优先级和任务清单
 - `skills/deploy-baseline-kit/`：用于识别项目并生成/收敛部署基线的 Codex skill
 - `template/`：可复制到新项目中的模板骨架
 - `template/deploy/`：部署目录、示例环境变量和脚本
@@ -49,11 +50,12 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 
 1. 先阅读 `docs/baseline-standard.md`
 2. 再阅读 `docs/deployment-sop.md`
-3. 复制 `template/` 到目标项目
-4. 替换模板中的项目名、服务名、镜像名、端口和启动命令
-5. 明确目标项目采用的本地运行模式与服务发布拆分方式
-6. 按目标项目情况补齐 `deploy/README.md`、环境变量和脚本实现
-7. 基于本仓库的 SOP 生成该项目自己的部署规范
+3. 如需了解后续演进方向，可参考 `docs/roadmap-v1.1.md`
+4. 复制 `template/` 到目标项目
+5. 替换模板中的项目名、服务名、镜像名、端口和启动命令
+6. 明确目标项目采用的本地运行模式与服务发布拆分方式
+7. 按目标项目情况补齐 `deploy/README.md`、环境变量和脚本实现
+8. 基于本仓库的 SOP 生成该项目自己的部署规范
 
 ### Codex Skill
 
@@ -190,6 +192,7 @@ The baseline reflects patterns proven in real delivery work, including:
 - `docs/baseline-standard.md`: baseline standards and conventions
 - `docs/deployment-sop.md`: generic deployment SOP
 - `docs/deploy-baseline-kit.md`: behavior boundaries and stability notes for `deploy-baseline-kit`
+- `docs/roadmap-v1.1.md`: next-stage optimization priorities and task checklist
 - `skills/deploy-baseline-kit/`: Codex skill for generating or converging projects onto this deployment baseline
 - `template/`: copyable project skeleton
 - `template/deploy/`: deployment scripts, env examples, and deployment docs
@@ -210,11 +213,12 @@ The template does not choose your application stack. It only provides a consiste
 
 1. Read `docs/baseline-standard.md`
 2. Read `docs/deployment-sop.md`
-3. Copy `template/` into the target project
-4. Replace placeholders for project name, service name, image name, ports, and startup commands
-5. Decide the local runtime model and deployment split for the target project
-6. Fill in `deploy/README.md`, environment files, and script implementations
-7. Derive a project-specific deployment standard from this baseline
+3. Review `docs/roadmap-v1.1.md` if you want the current improvement roadmap
+4. Copy `template/` into the target project
+5. Replace placeholders for project name, service name, image name, ports, and startup commands
+6. Decide the local runtime model and deployment split for the target project
+7. Fill in `deploy/README.md`, environment files, and script implementations
+8. Derive a project-specific deployment standard from this baseline
 
 ### Codex Skill
 
