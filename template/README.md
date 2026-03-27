@@ -70,5 +70,7 @@ env 模板建议：
 - `.env.example` 面向第一次本地接入，尽量只保留最小本地入口变量
 - `deploy/env/*.env.example` 面向部署运行时
 - 数据库和其他运行时细节优先放在 `deploy/env/*.env.example`
+- 敏感值统一使用 `replace-me`，镜像版本占位统一使用 `replace-with-git-sha`
+- 非敏感默认值可以保留可运行示例，外部非敏感地址可以使用 `example.com` 风格示例
 
 模板不会替你决定项目技术栈，只负责提供统一工程接口。

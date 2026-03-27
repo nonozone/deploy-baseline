@@ -239,7 +239,7 @@ project-root/
 
 - 承担更完整的运行时、数据库与部署变量样例
 - 明确区分必填、可选与 provider-specific 变量
-- 不要混用空值、`replace-me` 与近似真实值而不加说明
+- 明确占位规则：敏感值用 `replace-me`，镜像版本占位用 `replace-with-git-sha`，非敏感默认值可保留可运行示例，外部非敏感示例可使用 `example.com` 风格地址
 - 对状态型服务和验证相关变量单独分组
 
 ### 5.7 `scripts/`
