@@ -4,7 +4,7 @@
 
 部署基线：一套可迁移的容器部署与 `Make` 通用基线，用于在不同项目之间复用一致的开发、构建、测试与部署入口。
 
-Deploy Baseline is a reusable deployment baseline for containerized projects. It provides a consistent `Make`-based interface, layered Docker Compose structure, deployment SOPs, and a copyable project template.
+Deploy Baseline is a reusable deployment baseline for containerized projects, including monorepos with mixed deployment surfaces (self-hosted services, externally hosted static sites, and provider-managed platform units). It provides a consistent `Make`-based interface, layered Docker Compose structure, deployment SOPs, and a copyable project template.
 
 ## 中文说明
 
@@ -75,7 +75,7 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 - 自动判断项目根目录、运行模式和数据库类型
 - 在一次确认后完成生成或改造，而不是逐文件反复确认
 
-这个 skill 的主入口在 `skills/deploy-baseline-kit/SKILL.md`，设计说明在 `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`，行为边界说明在 `docs/deploy-baseline-kit.md`。
+这个 skill 的主入口在 `skills/deploy-baseline-kit/SKILL.md`，设计说明在 `docs/superpowers/specs/2026-03-26-monorepo-mixed-deployment-surfaces-design.md`，行为边界说明在 `docs/deploy-baseline-kit.md`。
 
 当前这套 skill 的增强重点包括：
 
@@ -105,11 +105,10 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 
 建议的最低验证面至少包括：
 
-- `bash -n` 检查新增或修改过的 shell 脚本
-- `docker compose config` 检查 Compose 展开结果
-- `make help` 检查命令面
-- 如果项目已有 `build/test/typecheck`，则执行它们
-- 检查生产 Compose 的 `healthcheck`、env file 和回滚边界说明
+- 按部署单元执行最低验证面（每个 unit 的验证面不同，不应按全仓库单一路径假定）
+- 对 `self-hosted` 单元：`bash -n`（新增/修改过的 shell）、`docker compose config`（该单元纳入 Compose 时）、`make help`（命令面）、如果已有 `build/test/typecheck` 则执行、检查生产 Compose 的 `healthcheck`/env 引用与该单元回滚边界说明
+- 对 `external-static-hosting` 单元：验证 build 命令与输出目录、路由/base path 假设、env 合约（build-time vs runtime）与托管说明（不默认 Dockerize）
+- 对 `external-platform` 单元：验证 manifest/config、deploy/local-dev 命令、secrets/ownership 边界与 rollback boundary 文档化（不强制 Compose）
 
 手工使用 `template/` 和使用 `deploy-baseline-kit` 并不冲突：
 
@@ -134,8 +133,8 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 - `make dev`：项目默认开发入口。负责启动标准开发环境；在全量 Docker 模式下通常拉起完整开发栈，在混合开发模式下至少拉起容器侧依赖，并明确本地还需启动哪些进程。
 - `make build`：项目级默认构建入口。负责生成项目默认交付物，例如应用镜像、后端构建产物或前端静态资源。
 - `make test`：项目级默认测试入口。负责执行项目的默认测试集合，而不是只跑某个子模块的局部测试。
-- `make deploy`：标准发布入口。负责执行该项目纳入统一发布链路的服务部署。
-- `make rollback`：标准回滚入口。负责回滚到项目约定的上一个有效发布单元，例如镜像标签、制品版本或 Git 版本。
+- `make deploy`：标准发布入口。负责执行项目约定的发布链路；在 mixed-surface/monorepo 中可以按部署单元发布，并明确哪些单元不在该链路内。
+- `make rollback`：标准回滚入口。回滚边界应按部署单元定义（镜像 tag / 制品版本 / Git ref / provider release）；对不可回滚或不纳入回滚链路的单元必须明确写在文档里。
 - `make logs`：默认日志查看入口。负责查看项目主要应用服务的运行日志，而不是要求使用者先记住具体容器名。
 
 除了顶层入口，项目也可以保留一组常见辅助命令，方便用户发现和单独执行某个环节：
@@ -164,6 +163,7 @@ Deploy Baseline is a reusable deployment baseline for containerized projects. It
 - 容器镜像优先使用 Git Commit SHA 或语义化版本号作为 tag
 - 不建议把 `latest` 作为生产发布和回滚依据
 - `make rollback` 应显式回滚到某个具体版本，而不是“回到当前默认镜像”
+- 在 mixed-surface/monorepo 中，回滚边界必须按部署单元明确（以及哪些单元被排除在回滚链路之外）
 
 ### 适用场景
 
@@ -245,7 +245,7 @@ Use it when you want Codex to:
 - infer the real project root, runtime mode, and database type
 - present one plan first, then apply changes after a single confirmation
 
-The main entry is `skills/deploy-baseline-kit/SKILL.md`, the design spec lives at `docs/superpowers/specs/2026-03-23-deploy-baseline-kit-design.md`, and the runtime behavior notes live at `docs/deploy-baseline-kit.md`.
+The main entry is `skills/deploy-baseline-kit/SKILL.md`, the design spec lives at `docs/superpowers/specs/2026-03-26-monorepo-mixed-deployment-surfaces-design.md`, and the runtime behavior notes live at `docs/deploy-baseline-kit.md`.
 
 The current enhancement focus for this skill is:
 
@@ -275,11 +275,10 @@ The most stable and complete path today is PostgreSQL-based projects; other data
 
 The recommended minimum verification surface includes:
 
-- `bash -n` for new or modified shell scripts
-- `docker compose config` for Compose expansion
-- `make help` for command-surface validation
-- existing `build/test/typecheck` commands when the repo already has them
-- production Compose `healthcheck`, env file, and rollback-boundary checks
+- per-unit verification paths (different unit types have different minimum checks; do not assume one repo-wide Compose-only path)
+- for `self-hosted` units: `bash -n` (new/modified shell scripts), `docker compose config` (when that unit is in Compose), `make help` (command surface), existing `build/test/typecheck` when present, and production Compose `healthcheck`/env references plus the unit's rollback-boundary notes
+- for `external-static-hosting` units: build command + output directory, routing/base-path assumptions, env contract (build-time vs runtime), and hosting notes (do not Dockerize by default)
+- for `external-platform` units: manifest/config, deploy/local-dev commands, secrets/ownership boundaries, and rollback-boundary documentation (do not force Compose)
 
 Manual use of `template/` and automated use of `deploy-baseline-kit` are complementary:
 
@@ -304,8 +303,8 @@ These top-level commands should keep stable meanings across projects:
 - `make dev`: the default local development entry. In full Docker mode it usually starts the full dev stack; in hybrid mode it should at least start containerized dependencies and make the remaining local processes explicit.
 - `make build`: the project-wide default build entry. It should produce the default deliverable, such as an app image, backend artifact, or frontend static bundle.
 - `make test`: the project-wide default test entry. It should run the default test surface for the project, not just one narrow submodule.
-- `make deploy`: the standard release entry for services that belong to the project's unified deployment path.
-- `make rollback`: the standard rollback entry for the project's rollback unit, such as an image tag, artifact version, or Git revision.
+- `make deploy`: the standard release entry for the project's defined deployment paths; in mixed-surface repos it may deploy one or more deployment units, and units outside the unified path must be explicitly documented.
+- `make rollback`: the standard rollback entry. Rollback boundaries must be defined per deployment unit (image tag, artifact version, Git revision, provider release). Units that cannot be rolled back or are excluded from rollback must be explicitly documented.
 - `make logs`: the default log-viewing entry for the main application service, so users do not need to memorize container names first.
 
 Projects can also expose common helper commands so users can discover and run one step in isolation when needed:
@@ -334,6 +333,7 @@ Rollback version semantics:
 - container images should prefer Git commit SHA or semantic version tags
 - `latest` should not be used as the production release or rollback reference
 - `make rollback` should target an explicit version, not an implicit default image
+- in mixed-surface/monorepo repos, rollback boundaries should be explicit per unit (and exclusions should be documented)
 
 ### Good Fit For
 

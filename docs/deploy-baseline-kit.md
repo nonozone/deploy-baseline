@@ -11,22 +11,22 @@
 当开发者在项目根目录或某个子目录调用 `deploy-baseline-kit` 时，Codex 会按下面的顺序处理：
 
 1. 先识别真实项目根目录
-2. 扫描项目已有部署资产
-3. 判断项目属于哪一类场景
-4. 判断运行模式和数据库类型
-5. 输出识别结果与改造方案
-6. 等待开发者一次确认
-7. 在确认后执行生成或收敛
-8. 执行部署面与命令面的最低验证
-9. 输出改造结果摘要
+2. 发现可部署面（deployable surfaces）：代码路径、public surface、部署命令、已有部署资产
+3. 构建“部署单元矩阵”（deployment unit matrix）
+4. 为每个部署单元给出推荐的 hosting mode 与 baseline action
+5. 输出识别结果与矩阵化改造方案
+6. 等待开发者一次确认（仍然只有一个确认点，但包含整个矩阵与未确定字段）
+7. 在确认后按部署单元分别执行生成/收敛/排除/文档化
+8. 按部署单元执行最低验证（只做与该单元 hosting mode 匹配的验证，Compose 只覆盖 self-hosted 单元）
+9. 输出按部署单元拆分的结果摘要与残留风险
 
 这意味着它不是一上来就直接改文件，而是先分析，再给方案，再执行。
 
-## 3. 它会识别哪些项目状态
+## 3. 它会识别哪些部署单元状态
 
-`deploy-baseline-kit` 当前按三类项目状态处理：
+`deploy-baseline-kit` 会对每个部署单元（deployment unit）按三类“成熟度”处理。单项目仓库是“只有一行的矩阵”，等价于只分析一个部署单元。
 
-### 3.1 空目录或近似空目录
+### 3.1 空目录或近似空目录（按单元）
 
 特征：
 
@@ -39,7 +39,7 @@
 
 - 优先按基线模板生成标准骨架
 
-### 3.2 轻量已有项目
+### 3.2 轻量已有项目（按单元）
 
 特征：
 
@@ -52,7 +52,7 @@
 - 先识别缺失项
 - 再给出补齐和收敛方案
 
-### 3.3 重度已有部署项目
+### 3.3 重度已有部署项目（按单元）
 
 特征：
 
@@ -63,7 +63,7 @@
 处理方式：
 
 - 先总结冲突点和改造范围
-- 再请开发者在唯一确认点里选择“保守改造”或“强制收敛”
+- 再请开发者在唯一确认点里，对“需要收敛的部署单元”选择“保守改造”或“强制收敛”
 
 ## 4. 它会不会直接改项目
 
@@ -87,17 +87,30 @@
 这个确认点会尽量一次性收拢所有关键决策，例如：
 
 - 识别到的项目根目录是否正确
-- 推荐采用的改造路径是否接受
-- 对重度已有项目是走保守改造还是强制收敛
-- 如果运行模式或数据库类型无法自动判断，要求开发者在这一轮里补充确认
+- 部署单元矩阵是否正确（有哪些单元、各自 code path / public surface）
+- 按部署单元拆分的现有资产清单（current assets by unit）
+- 每个部署单元的 hosting mode 与 baseline action 是否接受
+- 对 `self-hosted` 部署单元：确认 `dev_mode`（`full-docker` / `hybrid`）以及 `make dev` 会启动哪些单元
+- 每个部署单元的回滚边界（rollback unit）是否明确且可执行
+- 对需要收敛的部署单元，是走保守改造还是强制收敛
+- 按部署单元拆分的验证计划（verification plan by unit）
+- 如果有低置信字段（例如 hosting mode、deploy command、rollback unit），要求开发者在这一轮里补充确认或覆盖
 
 确认之后，skill 不再逐文件追问。
 
 但确认之后不代表“直接生成完就结束”，它还应继续做最低验证，并在最终结果里说明哪些验证已经完成、哪些没有完成。
 
+### 5.1 矩阵化确认示例（单条确认消息内）
+
+- `core: self-hosted, dev_mode=hybrid, converge-self-hosted (conservative) (make dev: core + shared infra)`
+- `www: external-static-hosting, exclude-from-compose（不建议 Dockerize，但仍然属于 baseline 的“需处理单元”）`
+- `worker: external-platform, provider-managed（manifest/config + deploy/local-dev 命令 + secrets/ownership + rollback 边界的文档化）`
+
 ## 6. 它会生成或收敛哪些内容
 
-确认后，`deploy-baseline-kit` 会围绕部署基线的目标结构进行处理，包括但不限于：
+确认后，`deploy-baseline-kit` 会围绕部署基线的目标结构进行处理。具体生成/收敛范围取决于部署单元的 hosting mode 与 baseline action。
+
+对典型 `self-hosted` 部署单元，可能包括但不限于：
 
 - `Makefile`
 - `.env.example`
@@ -120,17 +133,18 @@
 
 - 默认采用 merge、追加或局部修改
 - 不直接整文件覆盖已有 `Caddyfile`、`nginx.conf`、systemd unit、CI/CD workflow 等系统面配置
-- 只有在开发者明确选择强制收敛时，才允许整文件替换
+- 只有在开发者对该部署单元明确选择强制收敛（forced convergence）时，才允许整文件替换
 
 ## 7. 它在改造后至少应该验证什么
 
 最低验证面建议至少包括：
 
 - 对新增或修改过的 shell 脚本执行 `bash -n`
-- 对 Compose 文件执行 `docker compose config`
-- 对命令面执行 `make help`
+- 对 `self-hosted` 单元：对 Compose 文件执行 `docker compose config`，并检查 `healthcheck`、env 引用与回滚边界
+- 对 `external-static-hosting` 单元：验证 build 命令、输出目录、路由/base path 假设与 env 合约
+- 对 `external-platform` 单元：验证 manifest/config、deploy 命令、必需 secrets 文档与回滚边界说明
+- 对命令面执行 `make help`（如果本次引入或修改了 Make targets）
 - 如果项目已有 `build/test/typecheck`，则执行现有健康检查
-- 验证生产 Compose 的 `healthcheck`、env file 引用和回滚边界是否合理
 
 如果某项验证因为环境原因无法执行，也应在最终结果中明确写出来。
 
@@ -159,10 +173,12 @@
 - 更复杂的 monorepo 结构
 - 更复杂的多发布链路项目
 
-这不表示这些场景完全不能处理，而是表示：
+这不表示这些场景不能处理。实际行为边界更接近：
 
-- 已经有规则设计
-- 但尚未在足够多真实项目中反复验证
+- 仍会做扫描、矩阵化方案与单次确认
+- 仍会尽力识别数据库类型与持久化/托管形态，并给出对应的 baseline action 与验证计划
+- 但验证与收敛的置信度更低：更可能需要开发者在确认消息里补齐关键字段（例如连接方式、迁移策略、回滚边界）
+- 对非 PostgreSQL 的仓库，应在最终结果里明确标注“低置信字段”和“未能完成/跳过的验证项”，避免假定可完全自动化
 
 因此当前更稳妥的对外表述是：
 
