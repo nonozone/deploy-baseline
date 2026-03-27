@@ -5,9 +5,9 @@ services:
     image: postgres:18-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER:-sampleapp}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-me-in-production}
+      POSTGRES_DB: ${DB_NAME:-sampleapp}
       PGDATA: /var/lib/postgresql/data
     volumes:
       - pgdata_prod:/var/lib/postgresql/data

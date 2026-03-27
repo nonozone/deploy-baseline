@@ -67,7 +67,8 @@
 env 模板建议：
 
 - 按 project/runtime、database、publish ports、auth/secrets、provider-specific、observability/verification 分组
-- `.env.example` 面向本地开发
+- `.env.example` 面向第一次本地接入，尽量只保留最小本地入口变量
 - `deploy/env/*.env.example` 面向部署运行时
+- 数据库和其他运行时细节优先放在 `deploy/env/*.env.example`
 
 模板不会替你决定项目技术栈，只负责提供统一工程接口。

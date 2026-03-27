@@ -154,7 +154,9 @@ Recommended group order:
 Rules:
 
 - Keep `.env.example` for local or dev.
+- Prefer `.env.example` as a minimal generic first-run entry surface instead of a full runtime dump.
 - Keep `deploy/env/*.env.example` for deploy or runtime-specific files.
+- Keep database, provider, and fuller runtime variables in `deploy/env/*.env.example` unless the local flow truly requires them at the root.
 - Mark provider-specific keys as optional unless universally required.
 - Do not mix local-only variables and production-only variables without comments.
 - Avoid placeholder inconsistency such as mixing empty values, `replace-me`, and real-looking secrets without explanation.

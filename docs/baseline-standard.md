@@ -222,7 +222,14 @@ project-root/
 
 负责本地开发变量示例，不放真实敏感信息。
 
-建议按关注点分组，例如 project/runtime、database、ports、auth/secrets。
+建议保持为“第一次接入时最小可编辑入口”，优先只暴露本地运行最常改的少量变量，例如：
+
+- `COMPOSE_PROJECT_NAME`
+- `LOCAL_RUNTIME_MODE`
+- 应用开发端口或发布端口
+- 默认应用镜像标识
+
+不要默认把完整数据库、provider 或生产运行时变量全部塞进根 `.env.example`。
 
 ### 5.6 `deploy/env/*.example`
 
@@ -230,6 +237,7 @@ project-root/
 
 建议：
 
+- 承担更完整的运行时、数据库与部署变量样例
 - 明确区分必填、可选与 provider-specific 变量
 - 不要混用空值、`replace-me` 与近似真实值而不加说明
 - 对状态型服务和验证相关变量单独分组
