@@ -17,8 +17,9 @@ Keep the user interaction simple: analyze first, ask once, then execute.
 4. Determine a recommended baseline action per unit.
 5. Emit one confirmation message containing the full matrix and any unresolved low-confidence fields.
 6. After confirmation, execute per-unit handling without per-file follow-up questions.
-7. Run per-unit verification (only what applies to that unit's hosting mode).
-8. Report outcomes per unit: what changed, what was excluded, and residual risks/carryovers.
+7. Generate or update deployment docs so the chosen baseline actions are visible per unit.
+8. Run per-unit verification (only what applies to that unit's hosting mode).
+9. Report outcomes per unit: what changed, what was excluded, and residual risks/carryovers.
 
 ## Confirmation Gate
 
@@ -50,6 +51,8 @@ Examples of decisions the user can confirm (or override) inside the single confi
 - Use the bundled template as the default skeleton for new files.
 - Adapt the template instead of copying it blindly when the project already has meaningful deployment logic.
 - Generate deployment docs from the baseline SOP plus project-specific facts discovered during scanning.
+- For multi-unit repositories, document a deployment-unit matrix and clearly mark which units are self-hosted, externally hosted, provider-managed, included in `make deploy`, or excluded from rollback.
+- Prefer one operator-facing `deploy/README.md` with per-unit sections; split into additional unit docs only when one shared document would become ambiguous or too large.
 - Do not stop at file generation. Always verify the resulting deployment surface.
 - Prefer additive or merge-style edits for existing system-facing config such as reverse proxies or service units.
 - Full-file replacement of system-facing config is only allowed when the user explicitly chooses **forced convergence for that unit**.
@@ -79,6 +82,7 @@ Before confirmation, always include:
 - per-unit baseline action
 - current assets by unit
 - unresolved low-confidence fields (per-unit or repo-level)
+- documentation output plan
 - verification plan by unit
 
 The deployment unit matrix should be operator-readable (table or bullet rows) and include, at minimum:

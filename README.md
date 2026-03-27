@@ -26,6 +26,7 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 
 ### 仓库结构
 
+- `docs/README.md`：文档入口与推荐阅读顺序
 - `docs/baseline-standard.md`：通用基线规范
 - `docs/deployment-sop.md`：通用部署 SOP
 - `docs/deploy-baseline-kit.md`：`deploy-baseline-kit` 的实际行为边界与稳定支持范围说明
@@ -37,6 +38,17 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 - `fixtures/`：静态样板目录，用于记录项目分类、运行模式、推荐路径元信息，并支撑基础验证命令；`runnable/` 子目录则预留给未来可执行样板验证。
 
 `fixtures/` 记录候选项目形态的差异、期望模式和建议路径，仓库级别的验证命令将覆盖这些元信息，同时该层结构也为后续的 runnable/ 可执行样板提供承载空间。
+
+### 推荐阅读顺序
+
+建议优先从 [docs/README.md](./docs/README.md) 进入。
+
+最短阅读路径：
+
+1. `docs/baseline-standard.md`
+2. `docs/deployment-sop.md`
+3. `docs/deploy-baseline-kit.md`
+4. `docs/roadmap-v1.1.md`
 
 ### 验证命令
 - `make verify-fixtures-static`：当前 Phase 1 只覆盖静态样板验证，命令会检查 `fixtures/` 下每个 `fixture.md` 是否满足预期字段。
@@ -57,12 +69,13 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 
 1. 先阅读 `docs/baseline-standard.md`
 2. 再阅读 `docs/deployment-sop.md`
-3. 如需了解后续演进方向，可参考 `docs/roadmap-v1.1.md`
-4. 复制 `template/` 到目标项目
-5. 替换模板中的项目名、服务名、镜像名、端口和启动命令
-6. 明确目标项目采用的本地运行模式与服务发布拆分方式
-7. 按目标项目情况补齐 `deploy/README.md`、环境变量和脚本实现
-8. 基于本仓库的 SOP 生成该项目自己的部署规范
+3. 如果要用 Codex 自动改造项目，再阅读 `docs/deploy-baseline-kit.md`
+4. 如需了解后续演进方向，可参考 `docs/roadmap-v1.1.md`
+5. 复制 `template/` 到目标项目，或在目标项目中调用 `deploy-baseline-kit`
+6. 替换模板中的项目名、服务名、镜像名、端口和启动命令
+7. 明确目标项目采用的本地运行模式与服务发布拆分方式
+8. 按目标项目情况补齐 `deploy/README.md`、环境变量和脚本实现
+9. 基于本仓库的 SOP 生成该项目自己的部署规范
 
 ### Codex Skill
 
@@ -76,6 +89,13 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 - 在一次确认后完成生成或改造，而不是逐文件反复确认
 
 这个 skill 的主入口在 `skills/deploy-baseline-kit/SKILL.md`，设计说明在 `docs/superpowers/specs/2026-03-26-monorepo-mixed-deployment-surfaces-design.md`，行为边界说明在 `docs/deploy-baseline-kit.md`。
+
+当前仓库内与 skill 对齐更新的文档包括：
+
+- `docs/README.md`
+- `docs/deploy-baseline-kit.md`
+- `skills/deploy-baseline-kit/references/document-generation.md`
+- `template/deploy/README.md`
 
 当前这套 skill 的增强重点包括：
 
@@ -196,6 +216,7 @@ The baseline reflects patterns proven in real delivery work, including:
 
 ### Repository Layout
 
+- `docs/README.md`: document index and recommended reading order
 - `docs/baseline-standard.md`: baseline standards and conventions
 - `docs/deployment-sop.md`: generic deployment SOP
 - `docs/deploy-baseline-kit.md`: behavior boundaries and stability notes for `deploy-baseline-kit`
@@ -207,6 +228,17 @@ The baseline reflects patterns proven in real delivery work, including:
 - `fixtures/`: static fixture descriptions that anchor classification metadata ahead of runnable assets, with a `runnable/` subtree reserved for the future executable fixtures.
 
 `fixtures/` stores static descriptions of candidate project shapes, their expected runtime modes, and the guidance the baseline should provide; repo-level verification commands will cover this area to keep the metadata and layout consistent while leaving space for the `runnable/` subtree to house executable fixtures later.
+
+### Recommended Reading Order
+
+Start with [docs/README.md](./docs/README.md).
+
+Shortest path:
+
+1. `docs/baseline-standard.md`
+2. `docs/deployment-sop.md`
+3. `docs/deploy-baseline-kit.md`
+4. `docs/roadmap-v1.1.md`
 
 ### Verification Commands
 - `make verify-fixtures-static`: Phase 1 currently focuses solely on static fixture metadata validation, ensuring each `fixture.md` under `fixtures/` advertises the required fields.
@@ -227,12 +259,13 @@ The template does not choose your application stack. It only provides a consiste
 
 1. Read `docs/baseline-standard.md`
 2. Read `docs/deployment-sop.md`
-3. Review `docs/roadmap-v1.1.md` if you want the current improvement roadmap
-4. Copy `template/` into the target project
-5. Replace placeholders for project name, service name, image name, ports, and startup commands
-6. Decide the local runtime model and deployment split for the target project
-7. Fill in `deploy/README.md`, environment files, and script implementations
-8. Derive a project-specific deployment standard from this baseline
+3. Read `docs/deploy-baseline-kit.md` if you want Codex to inspect and transform the project for you
+4. Review `docs/roadmap-v1.1.md` if you want the current improvement roadmap
+5. Copy `template/` into the target project, or invoke `deploy-baseline-kit` from the target repo
+6. Replace placeholders for project name, service name, image name, ports, and startup commands
+7. Decide the local runtime model and deployment split for the target project
+8. Fill in `deploy/README.md`, environment files, and script implementations
+9. Derive a project-specific deployment standard from this baseline
 
 ### Codex Skill
 
@@ -246,6 +279,13 @@ Use it when you want Codex to:
 - present one plan first, then apply changes after a single confirmation
 
 The main entry is `skills/deploy-baseline-kit/SKILL.md`, the design spec lives at `docs/superpowers/specs/2026-03-26-monorepo-mixed-deployment-surfaces-design.md`, and the runtime behavior notes live at `docs/deploy-baseline-kit.md`.
+
+The repository docs kept in sync with the skill include:
+
+- `docs/README.md`
+- `docs/deploy-baseline-kit.md`
+- `skills/deploy-baseline-kit/references/document-generation.md`
+- `template/deploy/README.md`
 
 The current enhancement focus for this skill is:
 

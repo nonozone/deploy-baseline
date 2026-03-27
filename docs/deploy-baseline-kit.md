@@ -6,6 +6,12 @@
 
 它不是单纯的模板说明，也不是只做静态建议，而是一个可以实际介入项目结构整理的调用入口。
 
+推荐先配合 `docs/README.md` 一起看：
+
+- `docs/README.md` 负责给出仓库级阅读入口
+- 本文负责说明 skill 的运行边界和当前稳定支持面
+- `skills/deploy-baseline-kit/SKILL.md` 与 `references/` 负责定义 skill 的实际执行规则
+
 ## 2. 它在实际使用中会怎么处理项目
 
 当开发者在项目根目录或某个子目录调用 `deploy-baseline-kit` 时，Codex 会按下面的顺序处理：
@@ -244,3 +250,23 @@
 - 在确认后主动执行改造
 
 这会显著降低接入门槛，也让部署基线更像一个真正可用的工具，而不只是文档资产。
+
+## 14. 当前仓库里哪些内容已经和 skill 同步更新
+
+这次 mixed-surface / 多部署单元能力补齐后，仓库里以下内容已经同步到同一套口径：
+
+- `docs/README.md`
+- `README.md`
+- `skills/deploy-baseline-kit/SKILL.md`
+- `skills/deploy-baseline-kit/references/document-generation.md`
+- `skills/deploy-baseline-kit/references/verification.md`
+- `template/deploy/README.md`
+- `skills/deploy-baseline-kit/assets/template/deploy/README.md`
+
+可以把它们理解成三层：
+
+- 入口层：`README.md` 与 `docs/README.md`
+- 行为说明层：`docs/deploy-baseline-kit.md`
+- 执行规则层：`skills/deploy-baseline-kit/SKILL.md` 与 `references/`
+
+如果后续继续演进 skill，原则上应至少同时检查这三层是否仍然一致。
