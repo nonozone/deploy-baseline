@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: help setup init dev up down logs build test deploy-check deploy rollback prod-up prod-down prod-logs db-up db-down db-shell
+.PHONY: help setup init env-sync dev up down logs build test deploy-check deploy rollback prod-up prod-down prod-logs db-up db-down db-shell
 
 BOLD  := \033[1m
 RESET := \033[0m
@@ -26,6 +26,9 @@ setup: ## 初始化本地开发环境
 	bash scripts/setup.sh
 
 init: setup ## 首次初始化
+
+env-sync: ## 非破坏性补齐生产环境变量缺失项
+	bash deploy/scripts/env-sync.sh
 
 dev: ## 启动标准开发环境
 	bash scripts/dev.sh

@@ -10,4 +10,6 @@ else
   echo ".env 已存在，跳过生成。"
 fi
 
+bash "$ROOT_DIR/deploy/scripts/env-sync.sh"
+
 echo "请在 scripts/setup.sh 中补充项目实际初始化逻辑。"

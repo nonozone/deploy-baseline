@@ -243,6 +243,7 @@
 - `deploy/env/*.env.example` 面向部署或运行时
 - 本地变量和生产变量不要无注释混写
 - provider-specific 变量应标明是否可选
+- 如果 `deploy/env/app.prod.env.example` 新增了 active key，skill 在改造已有项目时应优先采用“非破坏性补齐缺失 key”的方式，而不是覆盖已有 `app.prod.env`
 
 ## 13. 为什么要做成 skill
 

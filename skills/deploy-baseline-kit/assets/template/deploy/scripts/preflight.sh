@@ -48,6 +48,21 @@ if [[ ! -f "$PROD_ENV_FILE" ]]; then
   exit 1
 fi
 
+missing_example_keys=()
+while IFS= read -r line; do
+  [[ -z "$line" ]] && continue
+  key="${line%%=*}"
+  if ! grep -Eq "^${key}=" "$PROD_ENV_FILE"; then
+    missing_example_keys+=("$key")
+  fi
+done < <(grep -E '^[A-Z0-9_]+=' "$ROOT_DIR/deploy/env/app.prod.env.example" || true)
+
+if [[ ${#missing_example_keys[@]} -gt 0 ]]; then
+  printf 'app.prod.env 缺少示例中的变量：%s\n' "$(IFS=,; echo "${missing_example_keys[*]}")"
+  echo "请先执行 make env-sync，再确认新增变量是否需要按真实环境填写。"
+  exit 1
+fi
+
 require_env "APP_IMAGE"
 require_env "APP_PUBLISH_PORT"
 require_env "APP_INTERNAL_PORT"

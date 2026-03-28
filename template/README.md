@@ -31,7 +31,7 @@
 模板里的 `Makefile` 默认提供两层命令：
 
 - 顶层统一入口：`make dev`、`make build`、`make test`、`make deploy`、`make rollback`、`make logs`
-- 常见辅助入口：`make help`、`make setup`、`make init`、`make up`、`make down`、`make deploy-check`、`make prod-up`、`make prod-down`、`make prod-logs`、`make db-up`、`make db-down`、`make db-shell`
+- 常见辅助入口：`make help`、`make setup`、`make init`、`make env-sync`、`make up`、`make down`、`make deploy-check`、`make prod-up`、`make prod-down`、`make prod-logs`、`make db-up`、`make db-down`、`make db-shell`
 
 建议先把顶层统一入口的语义定义清楚，再决定哪些辅助命令需要保留、裁剪或扩展。
 
@@ -72,5 +72,6 @@ env 模板建议：
 - 数据库和其他运行时细节优先放在 `deploy/env/*.env.example`
 - 敏感值统一使用 `replace-me`，镜像版本占位统一使用 `replace-with-git-sha`
 - 非敏感默认值可以保留可运行示例，外部非敏感地址可以使用 `example.com` 风格示例
+- 如果 `deploy/env/app.prod.env.example` 后续新增了 active key，可执行 `make env-sync` 非破坏性补齐真实 `deploy/env/app.prod.env`，不会覆盖已有值
 
 模板不会替你决定项目技术栈，只负责提供统一工程接口。

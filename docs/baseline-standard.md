@@ -581,6 +581,7 @@ project-root/
 说明：
 
 - `make deploy-check`：执行部署前检查
+- `make env-sync`：根据 `deploy/env/app.prod.env.example` 非破坏性补齐 `deploy/env/app.prod.env` 缺失变量
 - `make deploy`：执行标准部署
 - `make rollback`：执行标准回滚
 
@@ -592,6 +593,7 @@ project-root/
 - `make up`
 - `make down`
 - `make deploy-check`
+- `make env-sync`
 - `make prod-up`
 - `make prod-down`
 - `make prod-logs`

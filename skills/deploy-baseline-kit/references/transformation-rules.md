@@ -166,6 +166,7 @@ Rules:
 - Keep `deploy/env/*.env.example` for deploy or runtime-specific files.
 - Keep database, provider, and fuller runtime variables in `deploy/env/*.env.example` unless the local flow truly requires them at the root.
 - Use `replace-me` for sensitive placeholders, `replace-with-git-sha` for image-tag placeholders, and keep non-sensitive runnable defaults concrete when that improves usability.
+- When a real `deploy/env/app.prod.env` already exists, sync missing active keys from the example by example-group order when possible; never overwrite existing values silently.
 - Mark provider-specific keys as optional unless universally required.
 - Do not mix local-only variables and production-only variables without comments.
 - Avoid placeholder inconsistency such as mixing empty values, `replace-me`, and real-looking secrets without explanation.

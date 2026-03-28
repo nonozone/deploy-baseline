@@ -111,6 +111,18 @@ deploy/
 
 每个项目都必须提供一个 `make deploy-check` 或等价检查入口。
 
+如果项目使用 `deploy/env/app.prod.env.example` 作为生产环境模板，建议同时提供一个非破坏性的 env sync 入口，例如：
+
+```bash
+make env-sync
+```
+
+要求：
+
+- 只追加真实 `app.prod.env` 中缺失的 key
+- 不覆盖已有值
+- 在部署检查中能明确提示 example 与真实 env 的结构漂移
+
 部署前至少检查以下内容：
 
 1. Docker 可用

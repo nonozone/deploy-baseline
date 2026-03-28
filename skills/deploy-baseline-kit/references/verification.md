@@ -33,6 +33,7 @@ Applies when a unit is `hosting_mode=self-hosted` and typically `baseline_action
 
 - Verify `healthcheck` exists in production compose.
 - Verify env files referenced by compose actually exist or are documented.
+- Verify `deploy/env/app.prod.env` is not missing active keys that now exist in `deploy/env/app.prod.env.example`.
 - Verify any migration script resolves correct runtime paths in built artifacts.
 
 ### 6. Rollback boundary
