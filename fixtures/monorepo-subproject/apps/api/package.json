@@ -1,4 +1,8 @@
 {
   "name": "fixture-api",
-  "private": true
+  "private": true,
+  "scripts": {
+    "build": "echo api build",
+    "test": "echo api test"
+  }
 }

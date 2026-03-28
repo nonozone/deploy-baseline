@@ -133,6 +133,14 @@ Converge on these targets when they make sense for the project:
 
 Complex logic belongs in scripts, not in `Makefile`.
 
+For monorepos and multi-unit repositories:
+
+- treat the root `Makefile` as the project-level command surface
+- preserve unit-level commands in their native runner (`pnpm`, `npm`, `bun`, `go`, `cargo`, etc.)
+- do not force every unit command into the root `Makefile`
+- only add root aliases for unit commands when they are truly high-frequency project conventions
+- if a unit lacks `dev`, report that explicitly instead of adding a fake placeholder command
+
 ## Documentation rules
 
 - `deploy/README.md` must follow the deployment SOP shape

@@ -1,6 +1,6 @@
 ---
 name: deploy-baseline-kit
-description: Use when a developer wants Codex to inspect any project directory, identify the repository root, detect deployable surfaces, build a deployment unit matrix, and then generate or converge baseline deployment assets per unit with a single confirmation before file edits.
+description: Use when a developer wants Codex to inspect any project directory, identify the repository root, detect deployable and command surfaces, build a deployment unit matrix, and then generate or converge baseline deployment assets per unit with a single confirmation before file edits.
 ---
 
 # Deploy Baseline Kit
@@ -12,14 +12,15 @@ Keep the user interaction simple: analyze first, ask once, then execute.
 ## Workflow
 
 1. Resolve the repository root before planning any edits.
-2. Detect deployable surfaces (code paths, public entry points, deploy commands, existing deployment assets).
+2. Detect deployable surfaces and command surfaces (code paths, public entry points, deploy commands, project-level commands, unit-level scripts, existing deployment assets).
 3. Build a deployment unit matrix (single-project repos are a one-row matrix).
-4. Determine a recommended baseline action per unit.
-5. Emit one confirmation message containing the full matrix and any unresolved low-confidence fields.
-6. After confirmation, execute per-unit handling without per-file follow-up questions.
-7. Generate or update deployment docs so the chosen baseline actions are visible per unit.
-8. Run per-unit verification (only what applies to that unit's hosting mode).
-9. Report outcomes per unit: what changed, what was excluded, and residual risks/carryovers.
+4. Build a command surface matrix (single-project repos may still have both project-level and unit-level rows).
+5. Determine a recommended baseline action per unit.
+6. Emit one confirmation message containing the full matrices and any unresolved low-confidence fields.
+7. After confirmation, execute per-unit handling without per-file follow-up questions.
+8. Generate or update deployment docs so the chosen baseline actions are visible per unit.
+9. Run per-unit verification (only what applies to that unit's hosting mode).
+10. Report outcomes per unit: what changed, what was excluded, and residual risks/carryovers.
 
 ## Confirmation Gate
 
@@ -53,6 +54,9 @@ Examples of decisions the user can confirm (or override) inside the single confi
 - Generate deployment docs from the baseline SOP plus project-specific facts discovered during scanning.
 - For multi-unit repositories, document a deployment-unit matrix and clearly mark which units are self-hosted, externally hosted, provider-managed, included in `make deploy`, or excluded from rollback.
 - Prefer one operator-facing `deploy/README.md` with per-unit sections; split into additional unit docs only when one shared document would become ambiguous or too large.
+- Keep the root command contract project-level and stable.
+- Preserve unit-native command runners and scripts when they already provide clean unit-level entry points.
+- Do not assume every unit exposes `dev`; report missing unit-level scripts instead of inventing them.
 - Do not stop at file generation. Always verify the resulting deployment surface.
 - Prefer additive or merge-style edits for existing system-facing config such as reverse proxies or service units.
 - Full-file replacement of system-facing config is only allowed when the user explicitly chooses **forced convergence for that unit**.
@@ -64,6 +68,7 @@ Examples of decisions the user can confirm (or override) inside the single confi
 
 - Read [root-detection.md](references/root-detection.md) when the current working directory may not be the actual project root.
 - Read [project-analysis.md](references/project-analysis.md) to classify deployment unit maturity and inventory existing deployment assets.
+- Read [command-surfaces.md](references/command-surfaces.md) to distinguish project-level commands from unit-level commands and build a command surface matrix without assuming every unit exposes the same scripts.
 - Read [mode-detection.md](references/mode-detection.md) to choose `hosting_mode` per unit and, for `self-hosted` units, decide `dev_mode` (`full-docker` vs `hybrid`) without assuming one repo-wide mode.
 - Read [database-variants.md](references/database-variants.md) to detect PostgreSQL, MySQL, MariaDB, MongoDB, external databases, or unknown database setups.
 - Read [transformation-rules.md](references/transformation-rules.md) before editing files.
@@ -76,6 +81,7 @@ Before confirmation, always include:
 
 - repository root
 - deployment unit matrix (single-project repos are a one-row matrix)
+- command surface matrix
 - per-unit hosting mode
 - per-unit `dev_mode` (only for `self-hosted` units)
 - per-unit rollback unit
@@ -84,6 +90,16 @@ Before confirmation, always include:
 - unresolved low-confidence fields (per-unit or repo-level)
 - documentation output plan
 - verification plan by unit
+
+The command surface matrix should be operator-readable (table or bullet rows) and include, at minimum:
+
+- `scope`
+- `unit_name`
+- `code_path`
+- `runner`
+- `available_commands`
+- `missing_expected_commands`
+- `recommended_entry`
 
 The deployment unit matrix should be operator-readable (table or bullet rows) and include, at minimum:
 

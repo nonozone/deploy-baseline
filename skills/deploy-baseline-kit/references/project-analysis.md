@@ -1,6 +1,6 @@
 # Project Analysis
 
-This reference focuses on *deployment units* instead of assuming a single repository-wide convergence path. Each analysis pass should return a deployment-unit matrix before any confirmation, and treat a single-project repository as the trivial one-unit case.
+This reference focuses on *deployment units* instead of assuming a single repository-wide convergence path. Each analysis pass should return a deployment-unit matrix and a command surface matrix before any confirmation, and treat a single-project repository as the trivial one-unit case.
 
 ## Deployment unit inventory
 
@@ -11,6 +11,7 @@ For every candidate unit, capture the following signals; missing essential runti
 - **Hosting signals.** Clues about where the unit runs, such as Docker Compose files, `Dockerfile`s, static export directories, `vercel.json`, `wrangler.toml`, or CDN deploy manifests.
 - **Runtime manifests.** Project descriptors (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, `mix.exs`, etc.) that help infer the runtime, statefulness, and build requirements.
 - **Deploy commands.** Existing scripts, Makefile targets, npm scripts, or platform CLI commands that are already used to build or publish the surface.
+- **Command surfaces.** Distinguish project-level commands (for example `make dev`, repo-level package scripts) from unit-level commands (for example workspace package scripts, `go test`, `cargo test`, service-local scripts). Do not assume every unit exposes `dev`.
 - **Ownership boundaries.** Teams, owners, secrets, or runtime IAM policies tied to the unit; capture these when known so verification and rollback boundaries remain clear without forcing low-confidence states when the metadata is absent.
 
 ## Per-unit maturity categories
@@ -48,9 +49,30 @@ Every matrix row must include these required fields so downstream workflow steps
 
 If a repository only contains one deployable surface, the matrix simply has a single row and continues to fulfill all output requirements.
 
+## Command surface matrix output requirements
+
+Every analysis pass must also return a command surface matrix. This makes monorepos and mixed-runner repositories operator-readable without forcing every unit command into the root `Makefile`.
+
+| Field | Description |
+| --- | --- |
+| `scope` | `project-level` or `unit-level`. |
+| `unit_name` | Human-readable unit label or `repo` for project-level rows. |
+| `code_path` | Repository path that owns the command surface. |
+| `runner` | `make`, `pnpm`, `npm`, `bun`, `go`, `cargo`, `python`, etc. |
+| `available_commands` | Commands or scripts actually present. |
+| `missing_expected_commands` | Expected but absent commands, especially missing `dev/build/test/typecheck` signals. |
+| `recommended_entry` | The command the developer should use first for this scope. |
+
+Hard rules:
+
+- Do not assume every workspace package exposes `dev`.
+- Do not silently invent root aliases for unit commands that already work through the unit-native runner.
+- Report missing unit-level scripts plainly when a package only exposes `build/test/typecheck`.
+
 ## Always report per-unit
 
 - Detected repository root (for context, not for defining the deploy target).
 - Current assets and manifests tied to each unit.
+- Current command surfaces by scope and unit.
 - Missing baseline pieces per unit.
 - Any unit-level risks, ownership gaps, or low-confidence detections.

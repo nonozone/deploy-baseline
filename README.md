@@ -148,6 +148,13 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 
 项目可以扩展自己的子命令，但不应破坏这组统一入口。
 
+对 monorepo / 多单元项目，还应同时承认“单元级命令面”：
+
+- 根 `Makefile` 负责项目级统一入口
+- 子项目可以保留自己的 `dev/build/test/typecheck/migrate`
+- 不要求把所有子项目命令提升到根 `Makefile`
+- 不要假设每个子项目都有 `dev`
+
 建议为这些顶层命令赋予稳定语义：
 
 - `make dev`：项目默认开发入口。负责启动标准开发环境；在全量 Docker 模式下通常拉起完整开发栈，在混合开发模式下至少拉起容器侧依赖，并明确本地还需启动哪些进程。
@@ -346,6 +353,13 @@ These top-level commands should keep stable meanings across projects:
 - `make deploy`: the standard release entry for the project's defined deployment paths; in mixed-surface repos it may deploy one or more deployment units, and units outside the unified path must be explicitly documented.
 - `make rollback`: the standard rollback entry. Rollback boundaries must be defined per deployment unit (image tag, artifact version, Git revision, provider release). Units that cannot be rolled back or are excluded from rollback must be explicitly documented.
 - `make logs`: the default log-viewing entry for the main application service, so users do not need to memorize container names first.
+
+For monorepos and multi-unit repositories, also keep a separate unit-level command surface:
+
+- the root `Makefile` remains the project-level unified entry
+- unit-level packages or services may keep their own `dev/build/test/typecheck/migrate` commands
+- not every unit needs a `dev` script
+- do not force every unit command into the root `Makefile`
 
 Projects can also expose common helper commands so users can discover and run one step in isolation when needed:
 

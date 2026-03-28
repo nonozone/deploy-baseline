@@ -6,6 +6,9 @@
 - expected_classification: empty project
 - expected_mode: unknown
 - expected_database: unknown
+- expected_project_commands: none
+- expected_unit_commands: none
+- expected_command_recommendation: establish project-level commands first
 - support_level: stable
 - expected_recommendation: generate baseline skeleton
 - verification_level: static

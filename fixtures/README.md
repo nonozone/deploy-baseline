@@ -16,8 +16,7 @@ reserved for the executable verification layer planned for later phases.
 ## Metadata contract
 
 Each fixture directory must contain a `fixture.md` whose ordered list records the
-following keys so the upcoming metadata validation checks can assert them when
-the static verification script is added:
+following keys so the static verification checks can assert them:
 
 - `name`
 - `scenario`
@@ -25,11 +24,18 @@ the static verification script is added:
 - `expected_classification`
 - `expected_mode`
 - `expected_database`
+- `expected_project_commands`
+- `expected_unit_commands`
+- `expected_command_recommendation`
 - `support_level`
 - `expected_recommendation`
 - `verification_level`
 - `notes`
 
-Additional keys are not permitted in phase 1 so the validator can remain simple and
-predictable, though the structure keeps room for a `runnable/` subtree once the
-executable fixtures land.
+The command-related fields let fixtures describe both project-level and unit-level
+entry paths, which is important for monorepos and split-service repos where not
+every unit exposes the same scripts.
+
+Additional keys are not permitted in the current static verifier so the metadata
+contract remains simple and predictable, though the structure still keeps room
+for a `runnable/` subtree once the executable fixtures land.

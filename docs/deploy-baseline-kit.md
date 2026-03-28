@@ -17,14 +17,15 @@
 当开发者在项目根目录或某个子目录调用 `deploy-baseline-kit` 时，Codex 会按下面的顺序处理：
 
 1. 先识别真实项目根目录
-2. 发现可部署面（deployable surfaces）：代码路径、public surface、部署命令、已有部署资产
+2. 发现可部署面与命令面（deployable surfaces + command surfaces）：代码路径、public surface、部署命令、项目级入口、单元级脚本、已有部署资产
 3. 构建“部署单元矩阵”（deployment unit matrix）
-4. 为每个部署单元给出推荐的 hosting mode 与 baseline action
-5. 输出识别结果与矩阵化改造方案
-6. 等待开发者一次确认（仍然只有一个确认点，但包含整个矩阵与未确定字段）
-7. 在确认后按部署单元分别执行生成/收敛/排除/文档化
-8. 按部署单元执行最低验证（只做与该单元 hosting mode 匹配的验证，Compose 只覆盖 self-hosted 单元）
-9. 输出按部署单元拆分的结果摘要与残留风险
+4. 构建“命令面矩阵”（command surface matrix）
+5. 为每个部署单元给出推荐的 hosting mode 与 baseline action
+6. 输出识别结果与矩阵化改造方案
+7. 等待开发者一次确认（仍然只有一个确认点，但包含整个矩阵与未确定字段）
+8. 在确认后按部署单元分别执行生成/收敛/排除/文档化
+9. 按部署单元执行最低验证（只做与该单元 hosting mode 匹配的验证，Compose 只覆盖 self-hosted 单元）
+10. 输出按部署单元拆分的结果摘要与残留风险
 
 这意味着它不是一上来就直接改文件，而是先分析，再给方案，再执行。
 
@@ -94,6 +95,7 @@
 
 - 识别到的项目根目录是否正确
 - 部署单元矩阵是否正确（有哪些单元、各自 code path / public surface）
+- 命令面矩阵是否正确（项目级入口与单元级入口是否识别准确，哪些单元没有 `dev`）
 - 按部署单元拆分的现有资产清单（current assets by unit）
 - 每个部署单元的 hosting mode 与 baseline action 是否接受
 - 对 `self-hosted` 部署单元：确认 `dev_mode`（`full-docker` / `hybrid`）以及 `make dev` 会启动哪些单元
@@ -135,6 +137,13 @@
 - 轻量项目优先补齐和统一
 - 重度已有项目优先迁移和保留有效逻辑，而不是静默删除
 
+对于 monorepo 或多单元项目，还应额外遵守：
+
+- 根 `Makefile` 负责项目级统一入口
+- 单元级开发/测试命令可以继续保留在各自 runner 中
+- 不要求把所有单元命令都提升到根 `Makefile`
+- 如果某个单元没有 `dev`，应明确报告，而不是假定它存在
+
 对系统级配置文件，还应额外遵守一条保护原则：
 
 - 默认采用 merge、追加或局部修改
@@ -149,7 +158,8 @@
 - 对 `self-hosted` 单元：对 Compose 文件执行 `docker compose config`，并检查 `healthcheck`、env 引用与回滚边界
 - 对 `external-static-hosting` 单元：验证 build 命令、输出目录、路由/base path 假设与 env 合约
 - 对 `external-platform` 单元：验证 manifest/config、deploy 命令、必需 secrets 文档与回滚边界说明
-- 对命令面执行 `make help`（如果本次引入或修改了 Make targets）
+- 对项目级命令面执行 `make help`（如果本次引入或修改了 Make targets）
+- 对 monorepo 的单元级命令面，核对各单元实际存在的 `dev/build/test/typecheck/migrate`，不要把不存在的脚本写进文档或方案里
 - 如果项目已有 `build/test/typecheck`，则执行现有健康检查
 
 如果某项验证因为环境原因无法执行，也应在最终结果中明确写出来。

@@ -1,4 +1,8 @@
 {
   "name": "fixture-backend",
-  "private": true
+  "private": true,
+  "scripts": {
+    "build": "echo backend build",
+    "test": "echo backend test"
+  }
 }

@@ -21,6 +21,8 @@ Applies when a unit is `hosting_mode=self-hosted` and typically `baseline_action
 
 - Run `make help`.
 - Verify newly introduced targets exist and map to real scripts.
+- In monorepos, also verify project-level commands and unit-level commands are documented separately.
+- Do not claim a unit supports `dev` unless a real unit-level command exists.
 
 ### 4. Project health
 
@@ -61,4 +63,4 @@ Applies when a unit is `hosting_mode=external-platform` (commonly `baseline_acti
 
 ## Reporting
 
-Report results per unit. When verification cannot be completed, say exactly which check was skipped and why.
+Report results per unit. For monorepos, also report project-level versus unit-level command verification separately. When verification cannot be completed, say exactly which check was skipped and why.

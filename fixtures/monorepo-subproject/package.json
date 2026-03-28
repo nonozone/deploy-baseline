@@ -1,5 +1,10 @@
 {
   "name": "fixture-monorepo",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"]
+  "packageManager": "pnpm@10.17.1",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test"
+  }
 }

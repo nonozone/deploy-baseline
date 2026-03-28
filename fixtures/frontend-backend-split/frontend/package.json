@@ -1,4 +1,9 @@
 {
   "name": "fixture-frontend",
-  "private": true
+  "private": true,
+  "scripts": {
+    "dev": "echo frontend dev",
+    "build": "echo frontend build",
+    "test": "echo frontend test"
+  }
 }

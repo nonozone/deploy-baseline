@@ -11,6 +11,9 @@ required_fields=(
   expected_classification
   expected_mode
   expected_database
+  expected_project_commands
+  expected_unit_commands
+  expected_command_recommendation
   support_level
   expected_recommendation
   verification_level
@@ -110,6 +113,63 @@ for fixture in "${expected_fixtures[@]}"; do
       exit 1
     fi
   done
+
+  case "$fixture" in
+    heavy-existing-deploy)
+      rg -q '^help:' "$FIXTURES_DIR/$fixture/Makefile" || {
+        echo "expected help target in $fixture/Makefile" >&2
+        exit 1
+      }
+      rg -q '^deploy:' "$FIXTURES_DIR/$fixture/Makefile" || {
+        echo "expected deploy target in $fixture/Makefile" >&2
+        exit 1
+      }
+      ;;
+    frontend-backend-split)
+      rg -q '"build"\s*:' "$FIXTURES_DIR/$fixture/backend/package.json" || {
+        echo "expected backend build script in $fixture" >&2
+        exit 1
+      }
+      rg -q '"test"\s*:' "$FIXTURES_DIR/$fixture/backend/package.json" || {
+        echo "expected backend test script in $fixture" >&2
+        exit 1
+      }
+      rg -q '"dev"\s*:' "$FIXTURES_DIR/$fixture/frontend/package.json" || {
+        echo "expected frontend dev script in $fixture" >&2
+        exit 1
+      }
+      ;;
+    monorepo-subproject)
+      rg -q '"workspaces"\s*:' "$FIXTURES_DIR/$fixture/package.json" || {
+        echo "expected workspaces in $fixture/package.json" >&2
+        exit 1
+      }
+      rg -q '"build"\s*:' "$FIXTURES_DIR/$fixture/package.json" || {
+        echo "expected root build script in $fixture/package.json" >&2
+        exit 1
+      }
+      rg -q '"test"\s*:' "$FIXTURES_DIR/$fixture/package.json" || {
+        echo "expected root test script in $fixture/package.json" >&2
+        exit 1
+      }
+      rg -q '"build"\s*:' "$FIXTURES_DIR/$fixture/apps/api/package.json" || {
+        echo "expected api build script in $fixture" >&2
+        exit 1
+      }
+      rg -q '"test"\s*:' "$FIXTURES_DIR/$fixture/apps/api/package.json" || {
+        echo "expected api test script in $fixture" >&2
+        exit 1
+      }
+      if rg -q '"dev"\s*:' "$FIXTURES_DIR/$fixture/apps/api/package.json"; then
+        echo "api fixture should intentionally omit dev script in $fixture" >&2
+        exit 1
+      fi
+      rg -q '"dev"\s*:' "$FIXTURES_DIR/$fixture/apps/web/package.json" || {
+        echo "expected web dev script in $fixture" >&2
+        exit 1
+      }
+      ;;
+  esac
 
   verification_line="$(rg -m1 '^- verification_level: ' "$file" 2>/dev/null || true)"
   verification_value=""

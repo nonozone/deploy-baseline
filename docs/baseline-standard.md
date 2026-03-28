@@ -449,6 +449,9 @@ project-root/
 
 ### 8.1 顶层统一命令的语义
 
+这些命令默认属于“项目级命令面”（project-level command surface）。
+如果项目是 monorepo 或多单元仓库，还可以同时存在“单元级命令面”（unit-level command surface），例如工作区包自己的 `pnpm dev`、`pnpm test`、`go test`、`cargo test` 等。
+
 #### `make dev`
 
 含义：
@@ -461,6 +464,7 @@ project-root/
 - 全量 Docker 模式下，通常负责拉起完整开发栈
 - 混合开发模式下，至少负责拉起容器侧依赖，并明确本地还需启动哪些进程
 - 不能把真实开发入口分散到多个私有脚本里，却让 `make dev` 只做占位动作
+- 但也不要求把所有单元级 `dev` 都提升到根 `Makefile`
 
 #### `make build`
 
@@ -473,6 +477,7 @@ project-root/
 - 应输出该项目默认交付物
 - 可以是镜像构建、后端编译产物、前端静态资源，或它们的统一编排入口
 - 如果项目包含多个子应用，也必须保留一个项目级默认 `make build`
+- 子应用可以继续保留自己的单元级 `build`
 
 #### `make test`
 
@@ -485,6 +490,7 @@ project-root/
 - 应执行项目默认测试集合
 - 可以进一步拆出 `make test-backend`、`make test-web` 等子命令
 - 但不能只保留子命令而取消顶层 `make test`
+- 单元级测试命令可以继续保留在原生 runner 中，不必全部重命名为根 `Makefile` 目标
 
 #### `make deploy`
 
@@ -602,6 +608,20 @@ project-root/
 - 这些命令用于暴露更细粒度操作
 - 它们可以增强可发现性和可维护性
 - 但不能替代统一顶层命令的职责
+
+### 8.7 双层命令面规则
+
+对于 monorepo / 多服务项目，建议显式承认两层命令面并分别处理：
+
+- 项目级命令面：根 `Makefile` 或等价统一入口
+- 单元级命令面：子目录、workspace package 或服务目录自己的命令
+
+要求：
+
+- skill 和文档都应同时描述这两层
+- 不要假设每个单元都有 `dev`
+- 不要把所有单元命令都塞进根 `Makefile`
+- 如果某个单元只有 `build/test/typecheck`，应明确写出来，而不是生成虚假的 `dev`
 
 ## 9. 项目允许扩展的边界
 
