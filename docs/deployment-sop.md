@@ -114,7 +114,7 @@ deploy/
 如果项目使用 `deploy/env/app.prod.env.example` 作为生产环境模板，建议同时提供一个非破坏性的 env sync 入口，例如：
 
 ```bash
-make env-sync
+make prod-env-sync
 ```
 
 要求：

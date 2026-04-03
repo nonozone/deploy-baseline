@@ -72,7 +72,7 @@
 - 真实生产变量来源
 - `deploy/env/app.prod.env` 中哪些变量必须替换
 - 哪些变量属于敏感信息
-- 如果 `deploy/env/app.prod.env.example` 新增了 active key，应如何执行 `make env-sync` 或等价同步操作
+- 如果 `deploy/env/app.prod.env.example` 新增了 active key，应如何执行 `make prod-env-sync` 或等价同步操作
 
 建议按关注点分组说明：
 
@@ -94,7 +94,7 @@ make deploy-check
 如示例文件结构有更新，建议先执行：
 
 ```bash
-make env-sync
+make prod-env-sync
 ```
 
 如果项目包含数据库或存储，还应说明是否存在额外自检脚本，例如：

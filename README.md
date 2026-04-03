@@ -169,7 +169,8 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 - `make help`：显示所有可用命令与简要说明，建议作为命令发现入口。
 - `make setup`：初始化本地开发环境依赖。
 - `make init`：首次初始化入口，通常可复用 `setup`。
-- `make env-sync`：根据 `deploy/env/app.prod.env.example` 非破坏性补齐 `deploy/env/app.prod.env` 缺失变量，不覆盖已有值。
+- `make local-env-sync`：非破坏性补齐本地 `.env` 缺失变量，不覆盖已有值。每次 `make dev` 前自动执行。
+- `make prod-env-sync`：根据 `deploy/env/app.prod.env.example` 非破坏性补齐 `deploy/env/app.prod.env` 缺失变量，不覆盖已有值。（`make env-sync` 为兼容别名）
 - `make up` / `make down`：单独启动或停止开发态容器。
 - `make deploy-check`：执行部署前检查，例如 Docker、Compose、环境文件、关键变量和挂载策略检查。
 - `make prod-up` / `make prod-down` / `make prod-logs`：面向生产态容器的兼容或显式操作入口。
@@ -367,7 +368,8 @@ Projects can also expose common helper commands so users can discover and run on
 - `make help`: list available commands and short descriptions; this should be the command discovery entry.
 - `make setup`: initialize local development prerequisites.
 - `make init`: first-time initialization entry, often reusing `setup`.
-- `make env-sync`: insert missing keys from `deploy/env/app.prod.env.example` into `deploy/env/app.prod.env` by example group order when possible, without overwriting existing values.
+- `make local-env-sync`: insert missing keys from `.env.example` into `.env` without overwriting existing values. Runs automatically before each `make dev`.
+- `make prod-env-sync`: insert missing keys from `deploy/env/app.prod.env.example` into `deploy/env/app.prod.env` by example group order when possible, without overwriting existing values. (`make env-sync` is a compatibility alias.)
 - `make up` / `make down`: start or stop development containers without running the full `dev` flow.
 - `make deploy-check`: run pre-deployment checks for Docker, Compose, env files, critical variables, and persistence settings.
 - `make prod-up` / `make prod-down` / `make prod-logs`: explicit or compatibility production-container operations.
