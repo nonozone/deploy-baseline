@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: help setup init env-sync dev up down logs build test deploy-check deploy rollback prod-up prod-down prod-logs db-up db-down db-shell
+.PHONY: help setup init local-env-sync prod-env-sync env-sync dev up down logs build test deploy-check deploy rollback prod-up prod-down prod-logs db-up db-down db-shell
 
 BOLD  := \033[1m
 RESET := \033[0m
@@ -24,13 +24,20 @@ help: ## 显示所有可用命令
 
 setup: ## 初始化本地开发环境
 	bash scripts/setup.sh
+	$(MAKE) local-env-sync
+	$(MAKE) prod-env-sync
 
 init: setup ## 首次初始化
 
-env-sync: ## 非破坏性补齐生产环境变量缺失项
+local-env-sync: ## 非破坏性补齐本地 .env 缺失项
+	bash scripts/env-sync-local.sh
+
+prod-env-sync: ## 非破坏性补齐生产 app.prod.env 缺失项
 	bash deploy/scripts/env-sync.sh
 
-dev: ## 启动标准开发环境
+env-sync: prod-env-sync ## 兼容旧命名，等价于 make prod-env-sync
+
+dev: local-env-sync ## 启动标准开发环境
 	bash scripts/dev.sh
 
 up: ## 启动开发态容器

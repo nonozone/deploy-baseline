@@ -31,6 +31,8 @@ expected_fixtures=(
 
 allowed_verification_levels=(
   static
+  # runnable 级别计划在 v1.1 P0-1 runnable fixtures 落地后启用
+  # 届时需同步：(1) 此处追加 runnable，(2) 实现对应可运行验证逻辑
 )
 
 actual_fixtures=()

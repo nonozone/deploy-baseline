@@ -13,3 +13,7 @@
 - expected_recommendation: generate baseline skeleton
 - verification_level: static
 - notes: contains no deployment assets and should be treated as a near-empty project
+
+<!-- layout_files: intentionally empty -->
+<!-- This fixture represents a near-empty directory. No layout files are required by design. -->
+<!-- verify-fixtures-static.sh has no layout checks for empty-project, which is correct. -->

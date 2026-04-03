@@ -54,11 +54,11 @@ Phase 1 scaffolding and static fixture validation is the active first slice for 
 
 任务清单：
 
-- [ ] 设计样板项目目录结构与最小资产集合
-- [ ] 在仓库中约定样板项目存放方式或外部示例仓库策略
-- [ ] 为每个样板定义预期识别结果
-- [ ] 为每个样板定义预期改造结果
-- [ ] 为每个样板定义最低验证命令
+- [x] 设计样板项目目录结构与最小资产集合
+- [x] 在仓库中约定样板项目存放方式或外部示例仓库策略
+- [x] 为每个样板定义预期识别结果
+- [x] 为每个样板定义预期改造结果
+- [x] 为每个样板定义最低验证命令
 - [ ] 记录哪些样板属于稳定通过，哪些仍为实验性
 
 验收标准：
@@ -84,10 +84,10 @@ Phase 1 scaffolding and static fixture validation is the active first slice for 
 
 任务清单：
 
-- [ ] 定义 `verify-baseline` 的职责边界
-- [ ] 实现脚本或 `Makefile` 入口
+- [x] 定义 `verify-baseline` 的职责边界
+- [x] 实现脚本或 `Makefile` 入口
 - [ ] 约定缺少 Docker 或 Compose 时的降级行为
-- [ ] 约定哪些检查必须失败退出，哪些只提示 warning
+- [x] 约定哪些检查必须失败退出，哪些只提示 warning
 - [ ] 将该入口写入 `README.md` 和相关文档
 
 验收标准：

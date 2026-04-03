@@ -10,3 +10,4 @@ verify-fixtures-static: ## Verify static fixture metadata and layout
 	bash scripts/verify-fixtures-static.sh
 
 verify-baseline: verify-fixtures-static ## Run baseline repository verification
+	bash scripts/verify-baseline.sh
