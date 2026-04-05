@@ -19,9 +19,6 @@ services:
 
   app:
     image: ${APP_IMAGE:-sampleapp:latest}
-    build:
-      context: .
-      dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
       - ./deploy/env/app.prod.env
@@ -39,10 +36,6 @@ services:
         condition: service_healthy
     ports:
       - "${APP_PUBLISH_IP:-127.0.0.1}:${APP_PUBLISH_PORT:-8000}:${APP_INTERNAL_PORT:-8000}"
-    command:
-      - sh
-      - -c
-      - echo 请替换为项目实际生产启动命令 && sleep infinity
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:${APP_INTERNAL_PORT:-8000}${APP_HEALTHCHECK_PATH:-/health} >/dev/null 2>&1 || exit 1"]
       interval: 15s

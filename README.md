@@ -29,6 +29,7 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 - `docs/README.md`：文档入口与推荐阅读顺序
 - `docs/baseline-standard.md`：通用基线规范
 - `docs/deployment-sop.md`：通用部署 SOP
+- `docs/v1-release.md`：v1 的定位、核心命令和适用边界
 - `docs/deploy-baseline-kit.md`：`deploy-baseline-kit` 的实际行为边界与稳定支持范围说明
 - `docs/roadmap-v1.1.md`：下一阶段的优化方向、优先级和任务清单
 - `skills/deploy-baseline-kit/`：用于识别项目并生成/收敛部署基线的 Codex skill
@@ -45,10 +46,11 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 
 最短阅读路径：
 
-1. `docs/baseline-standard.md`
-2. `docs/deployment-sop.md`
-3. `docs/deploy-baseline-kit.md`
-4. `docs/roadmap-v1.1.md`
+1. `docs/v1-release.md`
+2. `docs/baseline-standard.md`
+3. `docs/deployment-sop.md`
+4. `docs/deploy-baseline-kit.md`
+5. `docs/roadmap-v1.1.md`
 
 ### 验证命令
 - `make verify-fixtures-static`：当前 Phase 1 只覆盖静态样板验证，命令会检查 `fixtures/` 下每个 `fixture.md` 是否满足预期字段。

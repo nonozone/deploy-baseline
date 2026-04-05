@@ -8,10 +8,11 @@
 
 如果你是第一次接触这个仓库，建议按下面顺序阅读：
 
-1. `docs/baseline-standard.md`
-2. `docs/deployment-sop.md`
-3. `docs/deploy-baseline-kit.md`
-4. `docs/roadmap-v1.1.md`
+1. `docs/v1-release.md`
+2. `docs/baseline-standard.md`
+3. `docs/deployment-sop.md`
+4. `docs/deploy-baseline-kit.md`
+5. `docs/roadmap-v1.1.md`
 
 如果你是要直接把这套基线接入到真实项目里，建议这样走：
 
@@ -24,6 +25,8 @@
 
 - `docs/baseline-standard.md`
   基线标准本体，定义统一命令面、Compose 结构、环境变量和部署目录约定。
+- `docs/v1-release.md`
+  v1 发布说明，适合第一次了解这个仓库的读者快速理解定位、边界和推荐命令。
 - `docs/deployment-sop.md`
   通用部署 SOP，定义项目级部署文档应该覆盖哪些章节和操作步骤。
 - `docs/deploy-baseline-kit.md`
@@ -50,10 +53,11 @@
 
 If this is your first time in the repository, read in this order:
 
-1. `docs/baseline-standard.md`
-2. `docs/deployment-sop.md`
-3. `docs/deploy-baseline-kit.md`
-4. `docs/roadmap-v1.1.md`
+1. `docs/v1-release.md`
+2. `docs/baseline-standard.md`
+3. `docs/deployment-sop.md`
+4. `docs/deploy-baseline-kit.md`
+5. `docs/roadmap-v1.1.md`
 
 If you want to apply the baseline to a real project, use this path:
 
@@ -66,6 +70,8 @@ If you want to apply the baseline to a real project, use this path:
 
 - `docs/baseline-standard.md`
   The baseline standard itself: command contract, Compose layers, env layout, and deploy directory conventions.
+- `docs/v1-release.md`
+  The v1 release note: project positioning, core commands, intended audience, and explicit product boundary.
 - `docs/deployment-sop.md`
   The generic deployment SOP that project-specific deploy docs should follow.
 - `docs/deploy-baseline-kit.md`

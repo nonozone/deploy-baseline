@@ -33,6 +33,7 @@ fi
 
 for file in \
   "$ROOT_DIR/docker-compose.prod.yml" \
+  "$ROOT_DIR/deploy/scripts/compose-prod.sh" \
   "$ROOT_DIR/deploy/scripts/deploy.sh" \
   "$ROOT_DIR/deploy/scripts/rollback.sh"
 do
@@ -43,10 +44,17 @@ do
 done
 
 if [[ ! -f "$PROD_ENV_FILE" ]]; then
-  echo "缺少生产环境文件：$PROD_ENV_FILE"
+  echo "缺少生产环境变量文件：$PROD_ENV_FILE"
   echo "可先复制 deploy/env/app.prod.env.example 为 deploy/env/app.prod.env 再继续。"
   exit 1
 fi
+
+set -a
+# shellcheck disable=SC1090
+source "$PROD_ENV_FILE"
+set +a
+
+TARGET_IMAGE="${DEPLOY_IMAGE:-${APP_IMAGE:-}}"
 
 missing_example_keys=()
 while IFS= read -r line; do
@@ -90,7 +98,16 @@ require_env "APP_PUBLISH_PORT"
 require_env "APP_INTERNAL_PORT"
 require_env "DB_PASSWORD"
 
-reject_placeholder '^APP_IMAGE=sampleapp:(latest|replace-with-git-sha)$' "APP_IMAGE 仍是模板默认值，请替换为项目实际镜像版本。建议使用 Git Commit SHA 或语义化版本号。"
+if [[ -z "$TARGET_IMAGE" ]]; then
+  echo "未解析出目标镜像。请在 deploy/env/app.prod.env 设置 APP_IMAGE，或在执行时显式传入 DEPLOY_IMAGE=image:tag。"
+  exit 1
+fi
+
+if [[ "$TARGET_IMAGE" =~ ^(sampleapp:|ghcr\.io/example-org/sampleapp:)(latest|replace-with-git-sha)$ ]]; then
+  echo "目标镜像仍是模板默认值，请替换为项目实际镜像版本。建议使用 Git Commit SHA 或语义化版本号。"
+  exit 1
+fi
+
 reject_placeholder '^DB_PASSWORD=(replace-me|change-me(-in-production)?)$' "DB_PASSWORD 仍是模板占位值，请替换为真实配置。"
 
 if ! grep -Eq 'healthcheck:' "$ROOT_DIR/docker-compose.prod.yml"; then
@@ -98,10 +115,22 @@ if ! grep -Eq 'healthcheck:' "$ROOT_DIR/docker-compose.prod.yml"; then
   exit 1
 fi
 
-if ! grep -Eq '请替换为项目实际(生产启动命令|镜像构建逻辑)' "$ROOT_DIR/Dockerfile" "$ROOT_DIR/docker-compose.prod.yml"; then
+if grep -Eq '^[[:space:]]+build:' "$ROOT_DIR/docker-compose.prod.yml"; then
+  echo "生产 Compose 不应包含 build 配置，请改为预构建镜像发布。"
+  exit 1
+fi
+
+export APP_IMAGE="$TARGET_IMAGE"
+
+if ! docker compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$PROD_ENV_FILE" config -q >/dev/null 2>&1; then
+  echo "docker compose config 校验失败，请先修复生产 Compose 或环境变量。"
+  exit 1
+fi
+
+if ! grep -Eq '请替换为项目实际镜像构建逻辑' "$ROOT_DIR/Dockerfile"; then
   :
 else
-  echo "模板中的生产启动或镜像构建占位逻辑尚未替换。"
+  echo "模板中的镜像构建占位逻辑尚未替换。"
   exit 1
 fi
 

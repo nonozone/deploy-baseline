@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: help setup init local-env-sync prod-env-sync env-sync dev up down logs build test deploy-check deploy rollback prod-up prod-down prod-logs db-up db-down db-shell
+.PHONY: help setup init local-env-sync prod-env-sync env-sync dev up down logs build test deploy-check deploy rollback prod-up prod-down prod-logs prod-status prod-health prod-version db-up db-down db-shell
 
 BOLD  := \033[1m
 RESET := \033[0m
@@ -71,6 +71,15 @@ prod-down: ## 停止生产容器
 
 prod-logs: ## 查看生产应用日志
 	$(COMPOSE_PROD) logs -f $(APP_SERVICE)
+
+prod-status: ## 查看生产服务状态
+	bash deploy/scripts/status.sh
+
+prod-health: ## 检查生产服务健康状态
+	bash deploy/scripts/health.sh
+
+prod-version: ## 查看生产服务当前镜像版本
+	bash deploy/scripts/version.sh
 
 db-up: ## 启动数据库容器
 	$(COMPOSE_BASE) up -d $(DB_SERVICE)

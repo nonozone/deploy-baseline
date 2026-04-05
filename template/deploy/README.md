@@ -120,6 +120,18 @@ make prod-env-sync
 make deploy
 ```
 
+镜像发布基线默认支持两种触发方式：
+
+- CI：GitHub Actions 构建并推送镜像后，在服务器执行 `DEPLOY_IMAGE=<image:tag> make deploy`
+- 手动：在服务器 `git pull` 更新部署脚本后，直接执行 `make deploy`，也可显式执行 `DEPLOY_IMAGE=<image:tag> make deploy`
+
+推荐约定：
+
+- 默认镜像仓库使用 `GHCR`
+- 镜像 tag 使用 `sha-<git-sha>` 或语义化版本号
+- 不要依赖 `latest` 作为发布或回滚依据
+- 部署后建议执行 `make prod-health`，排障时先看 `make prod-status`，确认版本时执行 `make prod-version`
+
 需要明确写出项目是否还需要：
 
 - 数据库迁移
@@ -180,6 +192,18 @@ make deploy
 make rollback
 ```
 
+推荐执行方式：
+
+```bash
+ROLLBACK_IMAGE=ghcr.io/<owner>/<repo>:sha-<git-sha> make rollback
+```
+
+推荐回滚后立即执行：
+
+```bash
+make prod-health
+```
+
 必须补充：
 
 - 按部署单元定义的回滚单位
@@ -220,7 +244,89 @@ make rollback
 - secrets 来源与归属边界
 - CDN、DNS、缓存刷新或平台回滚限制
 
-## 15. 常见故障排查
+## 15. 第一次部署教程
+
+建议按下面顺序执行，先保证“能成功一次”，再考虑优化。
+
+### 15.1 第一次本地启动
+
+```bash
+make setup
+make dev
+```
+
+说明：
+
+- `make setup` 会初始化本地环境，并补齐 `.env` 与 `deploy/env/app.prod.env` 缺失项
+- `make dev` 会以前台方式启动开发环境，并显示访问地址
+- 如果 `.env.example` 后续新增了变量，可再次执行 `make local-env-sync`
+
+### 15.2 第一次准备生产环境变量
+
+```bash
+make prod-env-sync
+```
+
+然后至少确认以下内容已替换成真实值：
+
+- `deploy/env/app.prod.env` 中的 `APP_IMAGE`
+- `deploy/env/app.prod.env` 中的 `DB_PASSWORD`
+- 其他项目实际需要的 secrets 或 provider 配置
+
+### 15.3 第一次手动部署
+
+在服务器更新代码后执行：
+
+```bash
+git pull
+make deploy-check
+make deploy
+make prod-health
+make prod-version
+```
+
+如果要显式指定版本：
+
+```bash
+DEPLOY_IMAGE=ghcr.io/<owner>/<repo>:sha-<git-sha> make deploy
+```
+
+### 15.4 第一次通过 CI 部署
+
+确保仓库已配置：
+
+- `DEPLOY_HOST`
+- `DEPLOY_USER`
+- `DEPLOY_PATH`
+- `SSH_PRIVATE_KEY`
+- `APP_PROD_ENV`
+
+然后推送到 `main`，CI 会：
+
+1. 构建镜像并推送到 `GHCR`
+2. SSH 到服务器
+3. 执行 `make deploy-check`
+4. 执行 `DEPLOY_IMAGE=<image:tag> make deploy`
+5. 执行 `make prod-health`
+
+### 15.5 第一次回滚
+
+```bash
+ROLLBACK_IMAGE=ghcr.io/<owner>/<repo>:sha-<old-git-sha> make rollback
+make prod-health
+make prod-version
+```
+
+## 16. 常见故障排查
+
+新手建议按这个顺序排查，不要一上来就改脚本：
+
+```bash
+make prod-status
+make prod-health
+make prod-version
+make prod-logs
+```
 
 至少覆盖：
 
@@ -230,6 +336,50 @@ make rollback
 - 健康检查失败
 - 数据库未就绪
 
-## 16. 项目特有说明
+### 16.1 `make deploy-check` 失败
+
+优先检查：
+
+- `deploy/env/app.prod.env` 是否存在
+- `APP_IMAGE` 是否还是模板占位值
+- `DB_PASSWORD` 是否还是 `replace-me`
+- `docker compose config -q` 是否报错
+
+### 16.2 `make deploy` 失败
+
+优先检查：
+
+- 服务器是否能访问镜像仓库
+- 目标镜像 tag 是否真实存在
+- `make prod-health` 是否失败
+- `make prod-logs` 中是否有启动异常
+
+### 16.3 `make prod-health` 失败
+
+优先检查：
+
+- 应用是否真正监听了 `APP_INTERNAL_PORT`
+- 健康检查路径是否与 `APP_HEALTHCHECK_PATH` 一致
+- 数据库是否可达
+- 应用是否因为缺少环境变量而启动失败
+
+### 16.4 想确认线上到底跑的是哪个版本
+
+执行：
+
+```bash
+make prod-version
+```
+
+### 16.5 回滚后还不正常
+
+优先检查：
+
+- 回滚镜像 tag 是否正确
+- 回滚后的数据库状态是否仍兼容旧代码
+- `make prod-health` 是否通过
+- `make prod-logs` 是否显示旧版本仍然启动失败
+
+## 17. 项目特有说明
 
 把这个项目自己的特殊部署前置条件、依赖或限制写在这里。

@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PROD_ENV_FILE="$ROOT_DIR/deploy/env/app.prod.env"
 SERVICE_NAME="${APP_SERVICE:-app}"
 
+source "$ROOT_DIR/deploy/scripts/compose-prod.sh"
+
 if [[ -z "${ROLLBACK_IMAGE:-}" ]]; then
   echo "未配置 ROLLBACK_IMAGE。"
   echo "项目接入时必须把真实回滚策略补充到 deploy/scripts/rollback.sh。"
@@ -21,10 +23,10 @@ fi
 
 export APP_IMAGE="$ROLLBACK_IMAGE"
 
-docker compose \
-  -f "$ROOT_DIR/docker-compose.prod.yml" \
-  --env-file "$PROD_ENV_FILE" \
-  up -d "$SERVICE_NAME"
+echo "开始回滚镜像：$ROLLBACK_IMAGE"
+compose_prod pull "$SERVICE_NAME"
+compose_prod up -d "$SERVICE_NAME"
+wait_for_service_health "$SERVICE_NAME" "${APP_HEALTHCHECK_TIMEOUT:-120}"
 
 echo "已执行回滚命令：$ROLLBACK_IMAGE"
-echo "项目接入时请补充回滚后健康检查与版本确认步骤。"
+echo "回滚后的健康检查已通过，请继续确认业务版本是否符合预期。"

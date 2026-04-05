@@ -31,7 +31,7 @@
 模板里的 `Makefile` 默认提供两层命令：
 
 - 顶层统一入口：`make dev`、`make build`、`make test`、`make deploy`、`make rollback`、`make logs`
-- 常见辅助入口：`make help`、`make setup`、`make init`、`make local-env-sync`、`make prod-env-sync`、`make up`、`make down`、`make deploy-check`、`make prod-up`、`make prod-down`、`make prod-logs`、`make db-up`、`make db-down`、`make db-shell`
+- 常见辅助入口：`make help`、`make setup`、`make init`、`make local-env-sync`、`make prod-env-sync`、`make up`、`make down`、`make deploy-check`、`make prod-up`、`make prod-down`、`make prod-logs`、`make prod-status`、`make prod-health`、`make prod-version`、`make db-up`、`make db-down`、`make db-shell`
 
 建议先把顶层统一入口的语义定义清楚，再决定哪些辅助命令需要保留、裁剪或扩展。
 
@@ -57,10 +57,60 @@
 
 - `DEPLOY_SSH_PORT`
 
+默认镜像发布模型：
+
+- CI 构建镜像并推送到 `GHCR`
+- 服务器执行 `docker compose pull` + `docker compose up -d`
+- `make deploy` 支持两种触发方式：CI 通过 `DEPLOY_IMAGE=<image:tag> make deploy` 触发；手动也可在服务器 `git pull` 后直接执行 `make deploy`
+- 如果手动不传 `DEPLOY_IMAGE`，则默认读取 `deploy/env/app.prod.env` 中的 `APP_IMAGE`
+- `make rollback` 通过 `ROLLBACK_IMAGE=<image:tag> make rollback` 显式回滚到某个可追溯 tag
+- 生产排障入口建议使用 `make prod-status`、`make prod-health`、`make prod-version`、`make prod-logs`
+
+推荐先掌握的核心命令：
+
+```bash
+make setup
+make local-env-sync
+make prod-env-sync
+make dev
+make deploy-check
+make deploy
+make rollback
+make prod-status
+make prod-health
+make prod-version
+make prod-logs
+```
+
+建议的新手使用顺序：
+
+- 第一次本地启动：`make setup` → `make dev`
+- 环境变量模板更新后：`make local-env-sync` / `make prod-env-sync`
+- 发布前：`make deploy-check`
+- 发布后排查：`make prod-status` → `make prod-health` → `make prod-version` → `make prod-logs`
+
+v1 边界定义：
+
+- 这是一个面向新手和 vibe coding 场景的部署基线，不是大厂级部署平台
+- v1 的目标是：简单、默认安全、能部署、能回滚、能排障
+- v1 默认只提供一条主链路：`GHCR` + 镜像发布 + 服务器 `docker compose pull/up`
+- v1 支持两种触发方式：CI 自动部署；服务器 `git pull` 后手动执行 `make deploy`
+- v1 到此为止的重点能力，就是上面的核心命令集
+
+v1 明确不做：
+
+- 不做 Kubernetes / Helm / Terraform
+- 不做蓝绿、金丝雀、自动回滚
+- 不做多云 / 多 provider 抽象层
+- 不做复杂 secrets 平台或 Web 管理后台
+- 不为了“更像大厂”继续堆高复杂度
+
+如果要继续演进，也应优先补“更清楚的 README / 教程 / 故障排查”，而不是先扩展更多部署模型。
+
 版本与回滚建议：
 
 - `APP_IMAGE` 不应长期保留 `latest` 风格
-- 正式接入时，建议改为 `your-image:<git-sha>` 或 `your-image:<semver>`
+- 正式接入时，建议改为 `ghcr.io/<owner>/<repo>:sha-<git-sha>` 或 `ghcr.io/<owner>/<repo>:<semver>`
 - `make rollback` 应显式指定要回滚到的镜像版本
 - 部署文档中必须写清镜像 tag 规则和回滚验证方式
 
@@ -72,6 +122,6 @@ env 模板建议：
 - 数据库和其他运行时细节优先放在 `deploy/env/*.env.example`
 - 敏感值统一使用 `replace-me`，镜像版本占位统一使用 `replace-with-git-sha`
 - 非敏感默认值可以保留可运行示例，外部非敏感地址可以使用 `example.com` 风格示例
-- 如果 `.env.example` 或 `deploy/env/app.prod.env.example` 后续新增了 active key：本地 `.env` 可运行 `make local-env-sync` 非破坏性补齐；生产 `deploy/env/app.prod.env` 可运行 `make prod-env-sync` 非破坏性补齐；两者都不会覆盖已有値值
+- 如果 `.env.example` 或 `deploy/env/app.prod.env.example` 后续新增了 active key：本地 `.env` 可运行 `make local-env-sync` 非破坏性补齐；生产 `deploy/env/app.prod.env` 可运行 `make prod-env-sync` 非破坏性补齐；两者都不会覆盖已有值
 
 模板不会替你决定项目技术栈，只负责提供统一工程接口。

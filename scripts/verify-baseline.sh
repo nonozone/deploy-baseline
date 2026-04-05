@@ -41,6 +41,10 @@ required_template_files=(
   "deploy/env/app.prod.env.example"
   "deploy/scripts/preflight.sh"
   "deploy/scripts/deploy.sh"
+  "deploy/scripts/compose-prod.sh"
+  "deploy/scripts/status.sh"
+  "deploy/scripts/health.sh"
+  "deploy/scripts/version.sh"
   "deploy/scripts/rollback.sh"
   "deploy/scripts/env-sync.sh"
   "deploy/README.md"
@@ -80,7 +84,7 @@ header "模板 Makefile 命令面检查"
 required_targets=(
   help setup init dev build test deploy rollback logs
   local-env-sync prod-env-sync deploy-check
-  up down prod-down prod-logs db-up db-down db-shell
+  up down prod-down prod-logs prod-status prod-health prod-version db-up db-down db-shell
 )
 for target in "${required_targets[@]}"; do
   if grep -Eq "^${target}:" "$TEMPLATE_DIR/Makefile"; then
@@ -90,7 +94,109 @@ for target in "${required_targets[@]}"; do
   fi
 done
 
-# ── 5. skill 资产检查 ───────────────────────────────────────────────
+# ── 5. dev 启动行为检查 ─────────────────────────────────────────────
+header "dev 启动行为检查"
+if grep -Fq "up --build" "$TEMPLATE_DIR/scripts/dev.sh"; then
+  pass "template/scripts/dev.sh 前台启动 compose"
+else
+  fail "template/scripts/dev.sh 应使用前台启动（缺少 up --build）"
+fi
+
+if grep -Fq "up -d --build" "$TEMPLATE_DIR/scripts/dev.sh"; then
+  fail "template/scripts/dev.sh 不应使用后台启动（检测到 up -d --build）"
+else
+  pass "template/scripts/dev.sh 未使用后台启动"
+fi
+
+if grep -Fq "http://127.0.0.1:" "$TEMPLATE_DIR/scripts/dev.sh"; then
+  pass "template/scripts/dev.sh 输出本地访问地址"
+else
+  fail "template/scripts/dev.sh 应输出本地访问地址"
+fi
+
+if cmp -s "$TEMPLATE_DIR/scripts/dev.sh" "$SKILL_DIR/assets/template/scripts/dev.sh"; then
+  pass "template/scripts/dev.sh 与 skill 资产保持同步"
+else
+  fail "template/scripts/dev.sh 与 skill 资产不一致"
+fi
+
+# ── 6. 镜像发布部署契约检查 ─────────────────────────────────────────
+header "镜像发布部署契约检查"
+if grep -Eq '^[[:space:]]+image:' "$TEMPLATE_DIR/docker-compose.prod.yml"; then
+  pass "docker-compose.prod.yml 包含 image 声明"
+else
+  fail "docker-compose.prod.yml 应包含 image 声明"
+fi
+
+if grep -Eq '^[[:space:]]+build:' "$TEMPLATE_DIR/docker-compose.prod.yml"; then
+  fail "docker-compose.prod.yml 不应包含生产构建逻辑（检测到 build:）"
+else
+  pass "docker-compose.prod.yml 未包含生产构建逻辑"
+fi
+
+if grep -Fq 'pull "$APP_SERVICE"' "$TEMPLATE_DIR/deploy/scripts/deploy.sh"; then
+  pass "deploy.sh 在发布前拉取目标镜像"
+else
+  fail "deploy.sh 应在发布前拉取目标镜像"
+fi
+
+if grep -Fq -- "--build" "$TEMPLATE_DIR/deploy/scripts/deploy.sh"; then
+  fail "deploy.sh 不应执行服务器本地构建（检测到 --build）"
+else
+  pass "deploy.sh 未执行服务器本地构建"
+fi
+
+if grep -Fq 'pull "$SERVICE_NAME"' "$TEMPLATE_DIR/deploy/scripts/rollback.sh"; then
+  pass "rollback.sh 在回滚前拉取目标镜像"
+else
+  fail "rollback.sh 应在回滚前拉取目标镜像"
+fi
+
+if grep -Fq 'wait_for_service_health "$SERVICE_NAME"' "$TEMPLATE_DIR/deploy/scripts/rollback.sh"; then
+  pass "rollback.sh 包含回滚后的健康检查"
+else
+  fail "rollback.sh 应包含回滚后的健康检查"
+fi
+
+if grep -Fq "registry: ghcr.io" "$TEMPLATE_DIR/.github/workflows/deploy.yml"; then
+  pass "deploy workflow 默认登录 GHCR"
+else
+  fail "deploy workflow 应默认登录 GHCR"
+fi
+
+if grep -Fq "docker/build-push-action" "$TEMPLATE_DIR/.github/workflows/deploy.yml"; then
+  pass "deploy workflow 构建并推送镜像"
+else
+  fail "deploy workflow 应构建并推送镜像"
+fi
+
+if grep -Fq "make prod-health" "$TEMPLATE_DIR/.github/workflows/deploy.yml"; then
+  pass "deploy workflow 在远端执行部署后健康检查"
+else
+  fail "deploy workflow 应在远端执行部署后健康检查"
+fi
+
+for rel_path in \
+  "docker-compose.prod.yml" \
+  "deploy/scripts/compose-prod.sh" \
+  "deploy/scripts/preflight.sh" \
+  "deploy/scripts/deploy.sh" \
+  "deploy/scripts/status.sh" \
+  "deploy/scripts/health.sh" \
+  "deploy/scripts/version.sh" \
+  "deploy/scripts/rollback.sh" \
+  ".github/workflows/deploy.yml" \
+  "deploy/env/app.prod.env.example" \
+  "deploy/env/app.env.example"
+do
+  if cmp -s "$TEMPLATE_DIR/$rel_path" "$SKILL_DIR/assets/template/$rel_path"; then
+    pass "$rel_path 与 skill 资产保持同步"
+  else
+    fail "$rel_path 与 skill 资产不一致"
+  fi
+done
+
+# ── 7. skill 资产检查 ───────────────────────────────────────────────
 header "skill 资产检查"
 if [[ -d "$SKILL_DIR" ]]; then
   pass "skills/deploy-baseline-kit 目录存在"
@@ -105,7 +211,7 @@ else
   warn "skills/deploy-baseline-kit 目录不存在（skill 资产未同步）"
 fi
 
-# ── 6. 本仓库根级脚本语法检查 ────────────────────────────────────────
+# ── 8. 本仓库根级脚本语法检查 ────────────────────────────────────────
 header "本仓库脚本语法检查"
 while IFS= read -r -d '' script; do
   rel="${script#"$ROOT_DIR/"}"
