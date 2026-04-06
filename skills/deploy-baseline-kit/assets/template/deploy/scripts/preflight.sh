@@ -12,6 +12,15 @@ require_env() {
   fi
 }
 
+require_nonempty_var() {
+  local key="$1"
+  local value="${!key:-}"
+  if [[ -z "$value" ]]; then
+    echo "${key} 不能为空，请在 $PROD_ENV_FILE 中填写真实配置。"
+    exit 1
+  fi
+}
+
 reject_placeholder() {
   local pattern="$1"
   local message="$2"
@@ -97,6 +106,7 @@ require_env "APP_IMAGE"
 require_env "APP_PUBLISH_PORT"
 require_env "APP_INTERNAL_PORT"
 require_env "DB_PASSWORD"
+require_nonempty_var "DB_PASSWORD"
 
 if [[ -z "$TARGET_IMAGE" ]]; then
   echo "未解析出目标镜像。请在 deploy/env/app.prod.env 设置 APP_IMAGE，或在执行时显式传入 DEPLOY_IMAGE=image:tag。"
@@ -108,7 +118,7 @@ if [[ "$TARGET_IMAGE" =~ ^(sampleapp:|ghcr\.io/example-org/sampleapp:)(latest|re
   exit 1
 fi
 
-reject_placeholder '^DB_PASSWORD=(replace-me|change-me(-in-production)?)$' "DB_PASSWORD 仍是模板占位值，请替换为真实配置。"
+reject_placeholder '^DB_PASSWORD=(replace-me|change-me(-in-production)?)$' "DB_PASSWORD 仍是旧模板占位值，请替换为真实配置。"
 
 if ! grep -Eq 'healthcheck:' "$ROOT_DIR/docker-compose.prod.yml"; then
   echo "生产 Compose 缺少 healthcheck 配置。"

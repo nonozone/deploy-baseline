@@ -35,6 +35,34 @@
 
 建议先把顶层统一入口的语义定义清楚，再决定哪些辅助命令需要保留、裁剪或扩展。
 
+### Shell 补全
+
+如果你希望在 `zsh` 或 `bash` 里输入 `make <Tab>` 时看到命令提示，模板默认提供：
+
+- `scripts/make-completion.sh`
+
+临时启用：
+
+```bash
+source scripts/make-completion.sh
+```
+
+长期启用可加入你的 shell 配置：
+
+```bash
+# bash
+echo 'source /path/to/project/scripts/make-completion.sh' >> ~/.bashrc
+
+# zsh
+echo 'source /path/to/project/scripts/make-completion.sh' >> ~/.zshrc
+```
+
+说明：
+
+- 该脚本会从当前项目 `Makefile` 中提取带 `##` 说明的 target
+- 因此新增命令后，重新 `source scripts/make-completion.sh` 即可刷新补全
+- `zsh` 需要已有 `compinit` / `compdef` 环境；大多数默认配置已自带
+
 模板里的 GitHub Actions 默认提供：
 
 - `.github/workflows/ci.yml`：执行 `make build` / `make test`
@@ -129,8 +157,9 @@ env 模板建议：
 - `.env.example` 面向第一次本地接入，尽量只保留最小本地入口变量
 - `deploy/env/*.env.example` 面向部署运行时
 - 数据库和其他运行时细节优先放在 `deploy/env/*.env.example`
-- 敏感值统一使用 `replace-me`，镜像版本占位统一使用 `replace-with-git-sha`
+- 敏感值默认留空，镜像版本占位统一使用 `replace-with-git-sha`
 - 非敏感默认值可以保留可运行示例，外部非敏感地址可以使用 `example.com` 风格示例
 - 如果 `.env.example` 或 `deploy/env/app.prod.env.example` 后续新增了 active key：本地 `.env` 可运行 `make local-env-sync` 非破坏性补齐；生产 `deploy/env/app.prod.env` 可运行 `make prod-env-sync` 非破坏性补齐；两者都不会覆盖已有值
+- 如果项目准备引入新的 `.env` 分层或新的部署 env 文件，必须先检查现有 env 配置并做合理迁移，不能直接用模板覆盖旧 `.env` 或现有 deploy env 文件
 
 模板不会替你决定项目技术栈，只负责提供统一工程接口。

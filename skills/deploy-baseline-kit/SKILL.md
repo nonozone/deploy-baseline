@@ -62,6 +62,7 @@ Examples of decisions the user can confirm (or override) inside the single confi
 - Full-file replacement of system-facing config is only allowed when the user explicitly chooses **forced convergence for that unit**.
 - Keep env examples grouped by concern and clearly separate local or dev files from production files.
 - When an existing `deploy/env/app.prod.env` is present, prefer non-destructive env sync that inserts missing keys by example-group order instead of overwriting the file.
+- When introducing a new env layout or new deploy env files into an existing project, first inspect the current env files and migrate valid values forward; never replace an existing `.env`, `.env.local`, or deploy env file wholesale just because the baseline uses a different layout.
 - Always state the rollback unit per deployment unit: git ref, image tag, provider release, or manual restore boundary.
 - If database migrations exist, document rollback boundaries explicitly instead of implying full reversibility.
 

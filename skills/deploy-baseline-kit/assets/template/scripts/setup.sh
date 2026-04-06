@@ -11,3 +11,4 @@ else
 fi
 
 echo "请在 scripts/setup.sh 中补充项目实际初始化逻辑。"
+echo "如需 make 命令补全，可执行：source scripts/make-completion.sh"

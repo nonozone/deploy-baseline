@@ -38,6 +38,7 @@ required_template_files=(
   "scripts/build.sh"
   "scripts/test.sh"
   "scripts/env-sync-local.sh"
+  "scripts/make-completion.sh"
   "scripts/pg-check.sh"
   "deploy/env/app.prod.env.example"
   "deploy/scripts/preflight.sh"
@@ -134,6 +135,12 @@ if cmp -s "$TEMPLATE_DIR/scripts/pg-check.sh" "$SKILL_DIR/assets/template/script
   pass "template/scripts/pg-check.sh 与 skill 资产保持同步"
 else
   fail "template/scripts/pg-check.sh 与 skill 资产不一致"
+fi
+
+if cmp -s "$TEMPLATE_DIR/scripts/make-completion.sh" "$SKILL_DIR/assets/template/scripts/make-completion.sh"; then
+  pass "template/scripts/make-completion.sh 与 skill 资产保持同步"
+else
+  fail "template/scripts/make-completion.sh 与 skill 资产不一致"
 fi
 
 header "PostgreSQL 18 持久化路径检查"

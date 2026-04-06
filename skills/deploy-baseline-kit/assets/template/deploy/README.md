@@ -73,6 +73,7 @@
 - `deploy/env/app.prod.env` 中哪些变量必须替换
 - 哪些变量属于敏感信息
 - 如果 `deploy/env/app.prod.env.example` 新增了 active key，应如何执行 `make prod-env-sync` 或等价同步操作
+- 如果项目后来引入了新的 env 分层或新的部署 env 文件，应如何先检查现有 env 配置并做迁移，而不是直接覆盖旧配置
 
 建议按关注点分组说明：
 
@@ -350,7 +351,7 @@ make prod-logs
 
 - `deploy/env/app.prod.env` 是否存在
 - `APP_IMAGE` 是否还是模板占位值
-- `DB_PASSWORD` 是否还是 `replace-me`
+- `DB_PASSWORD` 是否为空，或仍是旧模板占位值
 - `docker compose config -q` 是否报错
 - 如果是 PostgreSQL 18，执行 `make prod-pg-check` 确认挂载点是否为 `/var/lib/postgresql`
 

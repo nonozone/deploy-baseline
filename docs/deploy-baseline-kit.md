@@ -244,6 +244,7 @@
 - 本地变量和生产变量不要无注释混写
 - provider-specific 变量应标明是否可选
 - 如果 `deploy/env/app.prod.env.example` 新增了 active key，skill 在改造已有项目时应优先采用“非破坏性补齐缺失 key”的方式，而不是覆盖已有 `app.prod.env`
+- 如果项目要引入新的 `.env` 分层或新的部署 env 文件，必须先检查现有 env 配置并做合理迁移，保留已有有效值；不能因为基线目录结构不同就直接覆盖旧 `.env`、`.env.local` 或 deploy env 文件
 
 ## 13. 为什么要做成 skill
 
