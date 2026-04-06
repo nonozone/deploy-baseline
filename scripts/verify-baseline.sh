@@ -180,8 +180,8 @@ else
   pass "docker-compose.prod.yml 未使用 PostgreSQL 18 旧挂载路径"
 fi
 
-# ── 6. 镜像发布部署契约检查 ─────────────────────────────────────────
-header "镜像发布部署契约检查"
+# ── 6. 部署契约检查 ─────────────────────────────────────────────────
+header "部署契约检查"
 if grep -Eq '^[[:space:]]+image:' "$TEMPLATE_DIR/docker-compose.prod.yml"; then
   pass "docker-compose.prod.yml 包含 image 声明"
 else
@@ -189,27 +189,69 @@ else
 fi
 
 if grep -Eq '^[[:space:]]+build:' "$TEMPLATE_DIR/docker-compose.prod.yml"; then
-  fail "docker-compose.prod.yml 不应包含生产构建逻辑（检测到 build:）"
+  pass "docker-compose.prod.yml 包含源码部署所需的 build 配置"
 else
-  pass "docker-compose.prod.yml 未包含生产构建逻辑"
+  fail "docker-compose.prod.yml 应包含源码部署所需的 build 配置"
+fi
+
+if grep -Fq 'DEPLOY_MODE="${DEPLOY_MODE:-source}"' "$TEMPLATE_DIR/deploy/scripts/deploy.sh"; then
+  pass "deploy.sh 默认走源码部署"
+else
+  fail "deploy.sh 应默认走源码部署"
+fi
+
+if grep -Fq 'compose_prod build "$APP_SERVICE"' "$TEMPLATE_DIR/deploy/scripts/deploy.sh"; then
+  pass "deploy.sh 在源码部署时执行服务器本地构建"
+else
+  fail "deploy.sh 应在源码部署时执行服务器本地构建"
 fi
 
 if grep -Fq 'pull "$APP_SERVICE"' "$TEMPLATE_DIR/deploy/scripts/deploy.sh"; then
-  pass "deploy.sh 在发布前拉取目标镜像"
+  pass "deploy.sh 保留镜像部署拉取逻辑"
 else
-  fail "deploy.sh 应在发布前拉取目标镜像"
+  fail "deploy.sh 应保留镜像部署拉取逻辑"
 fi
 
-if grep -Fq -- "--build" "$TEMPLATE_DIR/deploy/scripts/deploy.sh"; then
-  fail "deploy.sh 不应执行服务器本地构建（检测到 --build）"
+if grep -Fq 'DEPLOY_MODE=image' "$TEMPLATE_DIR/.github/workflows/deploy.yml"; then
+  pass "deploy workflow 显式以镜像模式触发部署"
 else
-  pass "deploy.sh 未执行服务器本地构建"
+  fail "deploy workflow 应显式以镜像模式触发部署"
+fi
+
+if grep -Fq "workflow_dispatch:" "$TEMPLATE_DIR/.github/workflows/deploy.yml"; then
+  pass "deploy workflow 默认为手动触发"
+else
+  fail "deploy workflow 应改为手动触发"
+fi
+
+if grep -Fq "name: Optional GHCR Image Deploy" "$TEMPLATE_DIR/.github/workflows/deploy.yml"; then
+  pass "deploy workflow 标识为可选 GHCR 镜像部署"
+else
+  fail "deploy workflow 应明确为可选 GHCR 镜像部署"
+fi
+
+if grep -Fq 'ROLLBACK_REF' "$TEMPLATE_DIR/deploy/scripts/rollback.sh"; then
+  pass "rollback.sh 支持源码版本回滚"
+else
+  fail "rollback.sh 应支持源码版本回滚"
+fi
+
+if grep -Fq 'ROLLBACK_IMAGE' "$TEMPLATE_DIR/deploy/scripts/rollback.sh"; then
+  pass "rollback.sh 保留镜像版本回滚"
+else
+  fail "rollback.sh 应保留镜像版本回滚"
+fi
+
+if grep -Fq 'git -C "$ROOT_DIR" checkout "$ROLLBACK_REF"' "$TEMPLATE_DIR/deploy/scripts/rollback.sh"; then
+  pass "rollback.sh 源码回滚会切换到指定 Git 版本"
+else
+  fail "rollback.sh 应在源码回滚时切换到指定 Git 版本"
 fi
 
 if grep -Fq 'pull "$SERVICE_NAME"' "$TEMPLATE_DIR/deploy/scripts/rollback.sh"; then
-  pass "rollback.sh 在回滚前拉取目标镜像"
+  pass "rollback.sh 镜像回滚前会拉取目标镜像"
 else
-  fail "rollback.sh 应在回滚前拉取目标镜像"
+  fail "rollback.sh 应在镜像回滚前拉取目标镜像"
 fi
 
 if grep -Fq 'wait_for_service_health "$SERVICE_NAME"' "$TEMPLATE_DIR/deploy/scripts/rollback.sh"; then
@@ -219,9 +261,9 @@ else
 fi
 
 if grep -Fq "registry: ghcr.io" "$TEMPLATE_DIR/.github/workflows/deploy.yml"; then
-  pass "deploy workflow 默认登录 GHCR"
+  pass "deploy workflow 登录 GHCR"
 else
-  fail "deploy workflow 应默认登录 GHCR"
+  fail "deploy workflow 应登录 GHCR"
 fi
 
 if grep -Fq "docker/build-push-action" "$TEMPLATE_DIR/.github/workflows/deploy.yml"; then

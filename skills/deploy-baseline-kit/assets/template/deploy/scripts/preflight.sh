@@ -63,6 +63,7 @@ set -a
 source "$PROD_ENV_FILE"
 set +a
 
+DEPLOY_MODE="${DEPLOY_MODE:-source}"
 TARGET_IMAGE="${DEPLOY_IMAGE:-${APP_IMAGE:-}}"
 
 missing_example_keys=()
@@ -102,19 +103,13 @@ if [[ -f "$LOCAL_ENV_EXAMPLE" ]]; then
   fi
 fi
 
-require_env "APP_IMAGE"
 require_env "APP_PUBLISH_PORT"
 require_env "APP_INTERNAL_PORT"
 require_env "DB_PASSWORD"
 require_nonempty_var "DB_PASSWORD"
 
-if [[ -z "$TARGET_IMAGE" ]]; then
-  echo "未解析出目标镜像。请在 deploy/env/app.prod.env 设置 APP_IMAGE，或在执行时显式传入 DEPLOY_IMAGE=image:tag。"
-  exit 1
-fi
-
-if [[ "$TARGET_IMAGE" =~ ^(sampleapp:|ghcr\.io/example-org/sampleapp:)(latest|replace-with-git-sha)$ ]]; then
-  echo "目标镜像仍是模板默认值，请替换为项目实际镜像版本。建议使用 Git Commit SHA 或语义化版本号。"
+if [[ "$DEPLOY_MODE" != "source" && "$DEPLOY_MODE" != "image" ]]; then
+  echo "不支持的 DEPLOY_MODE=$DEPLOY_MODE，仅支持 source 或 image。"
   exit 1
 fi
 
@@ -122,11 +117,6 @@ reject_placeholder '^DB_PASSWORD=(replace-me|change-me(-in-production)?)$' "DB_P
 
 if ! grep -Eq 'healthcheck:' "$ROOT_DIR/docker-compose.prod.yml"; then
   echo "生产 Compose 缺少 healthcheck 配置。"
-  exit 1
-fi
-
-if grep -Eq '^[[:space:]]+build:' "$ROOT_DIR/docker-compose.prod.yml"; then
-  echo "生产 Compose 不应包含 build 配置，请改为预构建镜像发布。"
   exit 1
 fi
 
@@ -141,7 +131,22 @@ if grep -Fq 'image: postgres:18' "$ROOT_DIR/docker-compose.prod.yml"; then
   fi
 fi
 
-export APP_IMAGE="$TARGET_IMAGE"
+if [[ "$DEPLOY_MODE" == "source" ]]; then
+  if ! grep -Eq '^[[:space:]]+build:' "$ROOT_DIR/docker-compose.prod.yml"; then
+    echo "默认源码部署模式要求生产 Compose 包含 build 配置。"
+    exit 1
+  fi
+else
+  if [[ -z "$TARGET_IMAGE" ]]; then
+    echo "镜像部署模式未解析出目标镜像。请设置 APP_IMAGE，或显式传入 DEPLOY_IMAGE=image:tag。"
+    exit 1
+  fi
+  if [[ "$TARGET_IMAGE" =~ ^(sampleapp:|ghcr\.io/example-org/sampleapp:)(latest|replace-with-git-sha)$ ]]; then
+    echo "目标镜像仍是模板默认值，请替换为项目实际镜像版本。建议使用 Git Commit SHA 或语义化版本号。"
+    exit 1
+  fi
+  export APP_IMAGE="$TARGET_IMAGE"
+fi
 
 if ! docker compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$PROD_ENV_FILE" config -q >/dev/null 2>&1; then
   echo "docker compose config 校验失败，请先修复生产 Compose 或环境变量。"

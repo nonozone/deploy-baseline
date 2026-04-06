@@ -66,7 +66,7 @@ echo 'source /path/to/project/scripts/make-completion.sh' >> ~/.zshrc
 模板里的 GitHub Actions 默认提供：
 
 - `.github/workflows/ci.yml`：执行 `make build` / `make test`
-- `.github/workflows/deploy.yml`：在 `push main` 时尝试自动部署
+- `.github/workflows/deploy.yml`：可选的 GHCR 镜像部署示例，默认仅手动触发
 
 其中 `deploy.yml` 默认带“静默跳过”门槛：
 
@@ -85,14 +85,20 @@ echo 'source /path/to/project/scripts/make-completion.sh' >> ~/.zshrc
 
 - `DEPLOY_SSH_PORT`
 
-默认镜像发布模型：
+默认部署主链路：
 
-- CI 构建镜像并推送到 `GHCR`
-- 服务器执行 `docker compose pull` + `docker compose up -d`
-- `make deploy` 支持两种触发方式：CI 通过 `DEPLOY_IMAGE=<image:tag> make deploy` 触发；手动也可在服务器 `git pull` 后直接执行 `make deploy`
-- 如果手动不传 `DEPLOY_IMAGE`，则默认读取 `deploy/env/app.prod.env` 中的 `APP_IMAGE`
-- `make rollback` 通过 `ROLLBACK_IMAGE=<image:tag> make rollback` 显式回滚到某个可追溯 tag
+- 本地开发继续使用 `make dev`
+- 服务器默认执行 `git pull && make deploy`
+- `make deploy` 默认走源码部署：服务器本地执行 `docker compose build` + `docker compose up -d`
+- `make rollback` 默认支持 `ROLLBACK_REF=<git-tag-or-commit> make rollback`
 - 生产排障入口建议使用 `make prod-status`、`make prod-health`、`make prod-version`、`make prod-logs`
+
+高级可选链路：
+
+- 可选保留 `GHCR` 镜像部署
+- 模板提供 `.github/workflows/deploy.yml` 作为高级示例
+- 镜像部署需显式使用 `DEPLOY_MODE=image`
+- 镜像回滚需显式使用 `ROLLBACK_IMAGE=<image:tag> make rollback`
 
 推荐先掌握的核心命令：
 
@@ -122,8 +128,8 @@ v1 边界定义：
 
 - 这是一个面向新手和 vibe coding 场景的部署基线，不是大厂级部署平台
 - v1 的目标是：简单、默认安全、能部署、能回滚、能排障
-- v1 默认只提供一条主链路：`GHCR` + 镜像发布 + 服务器 `docker compose pull/up`
-- v1 支持两种触发方式：CI 自动部署；服务器 `git pull` 后手动执行 `make deploy`
+- v1 默认主链路是：本地 `make dev`，服务器 `git pull && make deploy`
+- v1 保留 `GHCR` 镜像发布作为高级可选方案，而不是默认起点
 - v1 到此为止的重点能力，就是上面的核心命令集
 
 v1 明确不做：
@@ -138,10 +144,11 @@ v1 明确不做：
 
 版本与回滚建议：
 
-- `APP_IMAGE` 不应长期保留 `latest` 风格
-- 正式接入时，建议改为 `ghcr.io/<owner>/<repo>:sha-<git-sha>` 或 `ghcr.io/<owner>/<repo>:<semver>`
-- `make rollback` 应显式指定要回滚到的镜像版本
-- 部署文档中必须写清镜像 tag 规则和回滚验证方式
+- 默认源码部署应保证服务器可直接基于当前代码执行构建
+- 默认回滚建议使用 Git tag 或 Git Commit SHA
+- 如果启用高级镜像部署，`APP_IMAGE` 不应长期保留 `latest` 风格
+- 如果启用高级镜像部署，建议使用 `ghcr.io/<owner>/<repo>:sha-<git-sha>` 或 `ghcr.io/<owner>/<repo>:<semver>`
+- 部署文档中必须写清源码回滚规则，若启用镜像部署也必须写清镜像 tag 规则和回滚验证方式
 
 PostgreSQL 18 数据卷注意事项：
 
@@ -157,7 +164,7 @@ env 模板建议：
 - `.env.example` 面向第一次本地接入，尽量只保留最小本地入口变量
 - `deploy/env/*.env.example` 面向部署运行时
 - 数据库和其他运行时细节优先放在 `deploy/env/*.env.example`
-- 敏感值默认留空，镜像版本占位统一使用 `replace-with-git-sha`
+- 敏感值默认留空；可选高级镜像部署变量也默认留空，需要时再手动填写固定 tag
 - 非敏感默认值可以保留可运行示例，外部非敏感地址可以使用 `example.com` 风格示例
 - 如果 `.env.example` 或 `deploy/env/app.prod.env.example` 后续新增了 active key：本地 `.env` 可运行 `make local-env-sync` 非破坏性补齐；生产 `deploy/env/app.prod.env` 可运行 `make prod-env-sync` 非破坏性补齐；两者都不会覆盖已有值
 - 如果项目准备引入新的 `.env` 分层或新的部署 env 文件，必须先检查现有 env 配置并做合理迁移，不能直接用模板覆盖旧 `.env` 或现有 deploy env 文件

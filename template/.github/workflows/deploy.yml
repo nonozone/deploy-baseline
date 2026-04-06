@@ -1,9 +1,7 @@
-name: Deploy
+name: Optional GHCR Image Deploy
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -121,6 +119,6 @@ jobs:
           ssh -p "${DEPLOY_SSH_PORT:-22}" "$DEPLOY_USER@$DEPLOY_HOST" "
             cd '$DEPLOY_PATH' &&
             make deploy-check &&
-            DEPLOY_IMAGE='$DEPLOY_IMAGE' make deploy &&
+            DEPLOY_MODE=image DEPLOY_IMAGE='$DEPLOY_IMAGE' make deploy &&
             make prod-health
           "

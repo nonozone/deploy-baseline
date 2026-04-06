@@ -28,7 +28,7 @@
 - 服务器要求
 - Docker 与 Compose 版本要求
 - 部署用户与目录要求
-- 镜像仓库访问要求
+- 如果启用高级镜像部署，说明镜像仓库访问要求
 - provider CLI 或平台权限要求（如果存在）
 
 ## 4. 本地运行模式说明
@@ -121,15 +121,21 @@ make prod-env-sync
 make deploy
 ```
 
-镜像发布基线默认支持两种触发方式：
+默认源码部署主链路：
 
-- CI：GitHub Actions 构建并推送镜像后，在服务器执行 `DEPLOY_IMAGE=<image:tag> make deploy`
-- 手动：在服务器 `git pull` 更新部署脚本后，直接执行 `make deploy`，也可显式执行 `DEPLOY_IMAGE=<image:tag> make deploy`
+- 在服务器 `git pull` 更新代码后，直接执行 `make deploy`
+- `make deploy` 默认会在服务器本地执行 `docker compose build` + `docker compose up -d`
+
+高级可选镜像部署：
+
+- 可选使用 GitHub Actions 构建并推送镜像
+- 在服务器执行 `DEPLOY_MODE=image DEPLOY_IMAGE=<image:tag> make deploy`
 
 推荐约定：
 
-- 默认镜像仓库使用 `GHCR`
-- 镜像 tag 使用 `sha-<git-sha>` 或语义化版本号
+- 默认部署模型是源码部署，不依赖镜像仓库
+- 如果启用高级镜像部署，默认示例仓库使用 `GHCR`
+- 如果启用高级镜像部署，镜像 tag 使用 `sha-<git-sha>` 或语义化版本号
 - 不要依赖 `latest` 作为发布或回滚依据
 - 部署后建议执行 `make prod-health`，排障时先看 `make prod-status`，确认版本时执行 `make prod-version`
 
@@ -193,7 +199,13 @@ make deploy
 make rollback
 ```
 
-推荐执行方式：
+默认源码回滚推荐执行方式：
+
+```bash
+ROLLBACK_REF=<git-tag-or-commit> make rollback
+```
+
+高级镜像回滚执行方式：
 
 ```bash
 ROLLBACK_IMAGE=ghcr.io/<owner>/<repo>:sha-<git-sha> make rollback
@@ -214,9 +226,11 @@ make prod-health
 推荐至少说明：
 
 - 使用什么镜像 tag 规则
+- 默认源码回滚使用什么 Git tag / Git Commit SHA 规则
 - 是否使用 Git Commit SHA 或语义化版本号
 - 为什么不能使用 `latest` 作为回滚依据
-- 执行回滚时如何显式指定目标版本
+- 执行源码回滚时如何显式指定目标 ref
+- 如果启用镜像回滚，执行时如何显式指定目标镜像版本
 - 哪些部署单元被排除在自托管回滚链路之外
 
 如果项目包含数据库或状态型服务，建议额外说明：
@@ -278,9 +292,9 @@ make prod-env-sync
 
 然后至少确认以下内容已替换成真实值：
 
-- `deploy/env/app.prod.env` 中的 `APP_IMAGE`
 - `deploy/env/app.prod.env` 中的 `DB_PASSWORD`
 - 其他项目实际需要的 secrets 或 provider 配置
+- 如果启用高级镜像部署，再额外确认 `deploy/env/app.prod.env` 中的 `APP_IMAGE`
 
 ### 15.3 第一次手动部署
 
@@ -294,13 +308,22 @@ make prod-health
 make prod-version
 ```
 
-如果要显式指定版本：
+如果要显式指定源码版本，建议先切到目标代码后再执行：
 
 ```bash
-DEPLOY_IMAGE=ghcr.io/<owner>/<repo>:sha-<git-sha> make deploy
+git checkout <git-tag-or-commit>
+make deploy
+```
+
+如果要走高级镜像部署：
+
+```bash
+DEPLOY_MODE=image DEPLOY_IMAGE=ghcr.io/<owner>/<repo>:sha-<git-sha> make deploy
 ```
 
 ### 15.4 第一次通过 CI 部署
+
+这属于高级可选链路，不是默认新手路径。
 
 确保仓库已配置：
 
@@ -315,15 +338,21 @@ DEPLOY_IMAGE=ghcr.io/<owner>/<repo>:sha-<git-sha> make deploy
 1. 构建镜像并推送到 `GHCR`
 2. SSH 到服务器
 3. 执行 `make deploy-check`
-4. 执行 `DEPLOY_IMAGE=<image:tag> make deploy`
+4. 执行 `DEPLOY_MODE=image DEPLOY_IMAGE=<image:tag> make deploy`
 5. 执行 `make prod-health`
 
 ### 15.5 第一次回滚
 
 ```bash
-ROLLBACK_IMAGE=ghcr.io/<owner>/<repo>:sha-<old-git-sha> make rollback
+ROLLBACK_REF=<old-git-tag-or-commit> make rollback
 make prod-health
 make prod-version
+```
+
+如果你启用了高级镜像部署，也可以执行：
+
+```bash
+ROLLBACK_IMAGE=ghcr.io/<owner>/<repo>:sha-<old-git-sha> make rollback
 ```
 
 ## 16. 常见故障排查
@@ -350,10 +379,10 @@ make prod-logs
 优先检查：
 
 - `deploy/env/app.prod.env` 是否存在
-- `APP_IMAGE` 是否还是模板占位值
 - `DB_PASSWORD` 是否为空，或仍是旧模板占位值
 - `docker compose config -q` 是否报错
 - 如果是 PostgreSQL 18，执行 `make prod-pg-check` 确认挂载点是否为 `/var/lib/postgresql`
+- 如果启用高级镜像部署，再检查 `APP_IMAGE` 是否为空、仍是 `sampleapp:*`，或仍指向错误镜像 tag
 
 ### 16.2 `make deploy` 失败
 

@@ -18,7 +18,10 @@ services:
       retries: 20
 
   app:
-    image: ${APP_IMAGE:-sampleapp:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${APP_IMAGE:-sampleapp:prod}
     restart: unless-stopped
     env_file:
       - ./deploy/env/app.prod.env
