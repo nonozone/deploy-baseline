@@ -18,6 +18,7 @@
 2. `docs/baseline-standard.md`
 3. `docs/deployment-sop.md`
 4. `docs/v1-release.md`
+5. `docs/upgrade-v1.1.0.md`
 
 如果你是要把这个 skill 用到真实项目里，建议这样走：
 
@@ -32,6 +33,8 @@
   基线标准本体，定义 skill 要把目标项目收敛成什么形状。
 - `docs/v1-release.md`
   历史发布说明，适合理解仓库之前的定位与边界。
+- `docs/upgrade-v1.1.0.md`
+  面向用户的升级说明，适合从 `v1.0.x` 迁移到 `v1.1.0` 时快速对齐使用方式。
 - `docs/deployment-sop.md`
   通用部署 SOP，定义项目级部署文档应该覆盖哪些章节和操作步骤。
 - `docs/deploy-baseline-kit.md`
@@ -70,6 +73,7 @@ If this is your first time in the repository, read in this order:
 2. `docs/baseline-standard.md`
 3. `docs/deployment-sop.md`
 4. `docs/v1-release.md`
+5. `docs/upgrade-v1.1.0.md`
 
 If you want to use the skill on a real project, use this path:
 
@@ -84,6 +88,8 @@ If you want to use the skill on a real project, use this path:
   The baseline standard itself: command contract, Compose layers, env layout, and deploy directory conventions.
 - `docs/v1-release.md`
   The v1 release note: project positioning, core commands, intended audience, and explicit product boundary.
+- `docs/upgrade-v1.1.0.md`
+  A user-facing upgrade guide for moving from `v1.0.x` to `v1.1.0`.
 - `docs/deployment-sop.md`
   The generic deployment SOP that project-specific deploy docs should follow.
 - `docs/deploy-baseline-kit.md`

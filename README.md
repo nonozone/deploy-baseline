@@ -69,6 +69,10 @@
 3. `docs/deployment-sop.md`
 4. `skills/deploy-baseline-kit/SKILL.md`
 
+如果你正从 `v1.0.x` 升级，建议再看：
+
+1. `docs/upgrade-v1.1.0.md`
+
 如果你是维护者，再继续看：
 
 1. `src/template/`
@@ -205,6 +209,10 @@ Shortest product path:
 2. `docs/baseline-standard.md`
 3. `docs/deployment-sop.md`
 4. `skills/deploy-baseline-kit/SKILL.md`
+
+If you are upgrading from `v1.0.x`, also read:
+
+1. `docs/upgrade-v1.1.0.md`
 
 Maintainer path:
 
