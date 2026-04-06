@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PROD_ENV_FILE="$ROOT_DIR/deploy/env/app.prod.env"
+CANONICAL_ENV_EXAMPLE="$ROOT_DIR/deploy/env/app.env.example"
 
 require_env() {
   local key="$1"
@@ -42,6 +43,7 @@ fi
 
 for file in \
   "$ROOT_DIR/docker-compose.prod.yml" \
+  "$CANONICAL_ENV_EXAMPLE" \
   "$ROOT_DIR/deploy/scripts/compose-prod.sh" \
   "$ROOT_DIR/deploy/scripts/deploy.sh" \
   "$ROOT_DIR/deploy/scripts/rollback.sh"
@@ -54,7 +56,7 @@ done
 
 if [[ ! -f "$PROD_ENV_FILE" ]]; then
   echo "缺少生产环境变量文件：$PROD_ENV_FILE"
-  echo "可先复制 deploy/env/app.prod.env.example 为 deploy/env/app.prod.env 再继续。"
+  echo "可先复制 deploy/env/app.env.example 为 deploy/env/app.prod.env 再继续。"
   exit 1
 fi
 
@@ -73,7 +75,7 @@ while IFS= read -r line; do
   if ! grep -Eq "^${key}=" "$PROD_ENV_FILE"; then
     missing_example_keys+=("$key")
   fi
-done < <(grep -E '^[A-Z0-9_]+=' "$ROOT_DIR/deploy/env/app.prod.env.example" || true)
+done < <(grep -E '^[A-Z0-9_]+=' "$CANONICAL_ENV_EXAMPLE" || true)
 
 if [[ ${#missing_example_keys[@]} -gt 0 ]]; then
   printf 'app.prod.env 缺少示例中的变量：%s\n' "$(IFS=,; echo "${missing_example_keys[*]}")"
@@ -81,9 +83,9 @@ if [[ ${#missing_example_keys[@]} -gt 0 ]]; then
   exit 1
 fi
 
-# 本地 .env 与 .env.example 同步检查（警告级，不阻断部署）
+# 本地 .env 与单一 canonical env 示例同步检查（警告级，不阻断部署）
 LOCAL_ENV_FILE="$ROOT_DIR/.env"
-LOCAL_ENV_EXAMPLE="$ROOT_DIR/.env.example"
+LOCAL_ENV_EXAMPLE="$CANONICAL_ENV_EXAMPLE"
 if [[ -f "$LOCAL_ENV_EXAMPLE" ]]; then
   missing_local_keys=()
   while IFS= read -r line; do
@@ -96,7 +98,7 @@ if [[ -f "$LOCAL_ENV_EXAMPLE" ]]; then
     fi
   done < <(grep -E '^[A-Z0-9_]+=' "$LOCAL_ENV_EXAMPLE" || true)
   if [[ ${#missing_local_keys[@]} -gt 0 ]]; then
-    printf '[warning] .env 缺少 .env.example 中的变量（建议执行 make local-env-sync）：%s\n' \
+    printf '[warning] .env 缺少 deploy/env/app.env.example 中的变量（建议执行 make local-env-sync）：%s\n' \
       "$(IFS=,; echo "${missing_local_keys[*]}")"
   elif [[ ! -f "$LOCAL_ENV_FILE" ]]; then
     echo "[warning] 未找到 .env 文件，建议先执行 make setup。"

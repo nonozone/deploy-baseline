@@ -9,7 +9,7 @@
 3. 替换项目名、服务名、镜像名
 4. 替换 `scripts/` 与 `deploy/scripts/` 中的占位逻辑
 5. 根据项目实际情况补齐 `deploy/README.md`
-6. 填写 `.env.example` 与 `deploy/env/*.example`
+6. 填写 `deploy/env/app.env.example`
 
 模板默认提供：
 
@@ -161,12 +161,12 @@ PostgreSQL 18 数据卷注意事项：
 env 模板建议：
 
 - 按 project/runtime、database、publish ports、auth/secrets、provider-specific、observability/verification 分组
-- `.env.example` 面向第一次本地接入，尽量只保留最小本地入口变量
-- `deploy/env/*.env.example` 面向部署运行时
-- 数据库和其他运行时细节优先放在 `deploy/env/*.env.example`
+- `deploy/env/app.env.example` 是唯一 canonical env 示例来源
+- 本地 `.env` 与生产 `deploy/env/app.prod.env` 都必须从 `deploy/env/app.env.example` 创建或同步
+- 这是强制规则，不再允许维护本地/生产两套独立 example
 - 敏感值默认留空；可选高级镜像部署变量也默认留空，需要时再手动填写固定 tag
 - 非敏感默认值可以保留可运行示例，外部非敏感地址可以使用 `example.com` 风格示例
-- 如果 `.env.example` 或 `deploy/env/app.prod.env.example` 后续新增了 active key：本地 `.env` 可运行 `make local-env-sync` 非破坏性补齐；生产 `deploy/env/app.prod.env` 可运行 `make prod-env-sync` 非破坏性补齐；两者都不会覆盖已有值
+- 如果 `deploy/env/app.env.example` 后续新增了 active key：本地 `.env` 可运行 `make local-env-sync` 非破坏性补齐；生产 `deploy/env/app.prod.env` 可运行 `make prod-env-sync` 非破坏性补齐；两者都不会覆盖已有值
 - 如果项目准备引入新的 `.env` 分层或新的部署 env 文件，必须先检查现有 env 配置并做合理迁移，不能直接用模板覆盖旧 `.env` 或现有 deploy env 文件
 
 模板不会替你决定项目技术栈，只负责提供统一工程接口。

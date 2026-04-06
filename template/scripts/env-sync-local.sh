@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EXAMPLE_FILE="$ROOT_DIR/.env.example"
+EXAMPLE_FILE="$ROOT_DIR/deploy/env/app.env.example"
 TARGET_FILE="$ROOT_DIR/.env"
 
 if [[ ! -f "$EXAMPLE_FILE" ]]; then
@@ -93,7 +93,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
 
   if [[ "$line" =~ ^[A-Z0-9_]+= ]]; then
     if [[ -z "$current_group" ]]; then
-      current_group="# added by env-sync-local from .env.example"
+      current_group="# added by env-sync-local from deploy/env/app.env.example"
       register_group "$current_group"
     fi
     printf '%s\n' "$line" >> "${example_group_files[$current_group]}"
@@ -162,9 +162,9 @@ for example_group in "${example_groups[@]}"; do
 done
 
 if [[ "$inserted_any" == false ]]; then
-  echo ".env 已与 .env.example 对齐，无需追加。"
+  echo ".env 已与 deploy/env/app.env.example 对齐，无需追加。"
   exit 0
 fi
 
 mv "$tmp_file" "$TARGET_FILE"
-printf '已向 .env 按分组补齐缺失变量：%s\n' "$(IFS=,; echo "${missing_keys[*]}")"
+printf '已根据 deploy/env/app.env.example 向 .env 按分组补齐缺失变量：%s\n' "$(IFS=,; echo "${missing_keys[*]}")"

@@ -121,7 +121,7 @@
 对典型 `self-hosted` 部署单元，可能包括但不限于：
 
 - `Makefile`
-- `.env.example`
+- `deploy/env/app.env.example`
 - `docker-compose.yml`
 - `docker-compose.dev.yml`
 - `docker-compose.prod.yml`
@@ -239,11 +239,11 @@
 
 同时应遵守：
 
-- `.env.example` 面向本地开发
-- `deploy/env/*.env.example` 面向部署或运行时
+- `deploy/env/app.env.example` 是唯一 canonical env 示例来源
+- 本地 `.env` 与生产 `deploy/env/app.prod.env` 都必须从它创建或同步
 - 本地变量和生产变量不要无注释混写
 - provider-specific 变量应标明是否可选
-- 如果 `deploy/env/app.prod.env.example` 新增了 active key，skill 在改造已有项目时应优先采用“非破坏性补齐缺失 key”的方式，而不是覆盖已有 `app.prod.env`
+- 如果 `deploy/env/app.env.example` 新增了 active key，skill 在改造已有项目时应优先采用“非破坏性补齐缺失 key”的方式同步 `.env` 与 `app.prod.env`，而不是覆盖已有值
 - 如果项目要引入新的 `.env` 分层或新的部署 env 文件，必须先检查现有 env 配置并做合理迁移，保留已有有效值；不能因为基线目录结构不同就直接覆盖旧 `.env`、`.env.local` 或 deploy env 文件
 
 ## 13. 为什么要做成 skill

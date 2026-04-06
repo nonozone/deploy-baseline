@@ -69,10 +69,11 @@
 
 至少说明：
 
+- `deploy/env/app.env.example` 是唯一 canonical env 示例来源
 - 真实生产变量来源
 - `deploy/env/app.prod.env` 中哪些变量必须替换
 - 哪些变量属于敏感信息
-- 如果 `deploy/env/app.prod.env.example` 新增了 active key，应如何执行 `make prod-env-sync` 或等价同步操作
+- 如果 `deploy/env/app.env.example` 新增了 active key，应如何执行 `make local-env-sync` / `make prod-env-sync` 或等价同步操作
 - 如果项目后来引入了新的 env 分层或新的部署 env 文件，应如何先检查现有 env 配置并做迁移，而不是直接覆盖旧配置
 
 建议按关注点分组说明：
@@ -280,9 +281,9 @@ make dev
 
 说明：
 
-- `make setup` 会初始化本地环境，并补齐 `.env` 与 `deploy/env/app.prod.env` 缺失项
+- `make setup` 会基于 `deploy/env/app.env.example` 初始化本地环境，并补齐 `.env` 与 `deploy/env/app.prod.env` 缺失项
 - `make dev` 会以前台方式启动开发环境，并在进入持续日志前统一显示应用首页、健康检查和 PostgreSQL 入口
-- 如果 `.env.example` 后续新增了变量，可再次执行 `make local-env-sync`
+- 如果 `deploy/env/app.env.example` 后续新增了变量，可再次执行 `make local-env-sync`
 
 ### 15.2 第一次准备生产环境变量
 

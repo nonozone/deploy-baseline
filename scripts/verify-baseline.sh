@@ -27,7 +27,6 @@ done < <(find "$TEMPLATE_DIR/scripts" "$TEMPLATE_DIR/deploy/scripts" -name "*.sh
 # ── 2. 模板文件完整性 ────────────────────────────────────────────────
 header "模板文件完整性检查"
 required_template_files=(
-  ".env.example"
   "Makefile"
   "Dockerfile"
   "docker-compose.yml"
@@ -40,7 +39,7 @@ required_template_files=(
   "scripts/env-sync-local.sh"
   "scripts/make-completion.sh"
   "scripts/pg-check.sh"
-  "deploy/env/app.prod.env.example"
+  "deploy/env/app.env.example"
   "deploy/scripts/preflight.sh"
   "deploy/scripts/deploy.sh"
   "deploy/scripts/compose-prod.sh"
@@ -62,8 +61,8 @@ for f in "${required_template_files[@]}"; do
   fi
 done
 
-# ── 3. .env.example 关键 key 完整性 ─────────────────────────────────
-header ".env.example 关键变量检查"
+# ── 3. 单一 canonical env 关键 key 完整性 ──────────────────────────
+header "单一 canonical env 关键变量检查"
 required_env_keys=(
   COMPOSE_PROJECT_NAME
   LOCAL_RUNTIME_MODE
@@ -75,10 +74,35 @@ required_env_keys=(
   DB_NAME
 )
 for key in "${required_env_keys[@]}"; do
-  if grep -Eq "^${key}=" "$TEMPLATE_DIR/.env.example"; then
+  if grep -Eq "^${key}=" "$TEMPLATE_DIR/deploy/env/app.env.example"; then
     pass "$key"
   else
-    fail ".env.example 缺少变量：$key"
+    fail "deploy/env/app.env.example 缺少变量：$key"
+  fi
+done
+
+if [[ -f "$TEMPLATE_DIR/.env.example" ]]; then
+  fail "不允许保留 template/.env.example；本地与生产 env 必须共用 deploy/env/app.env.example"
+else
+  pass "template/.env.example 已移除"
+fi
+
+if [[ -f "$TEMPLATE_DIR/deploy/env/app.prod.env.example" ]]; then
+  fail "不允许保留 deploy/env/app.prod.env.example；本地与生产 env 必须共用 deploy/env/app.env.example"
+else
+  pass "deploy/env/app.prod.env.example 已移除"
+fi
+
+for script_path in \
+  "scripts/setup.sh" \
+  "scripts/env-sync-local.sh" \
+  "deploy/scripts/env-sync.sh" \
+  "deploy/scripts/preflight.sh"
+do
+  if grep -Fq 'deploy/env/app.env.example' "$TEMPLATE_DIR/$script_path"; then
+    pass "$script_path 使用单一 canonical env"
+  else
+    fail "$script_path 必须使用 deploy/env/app.env.example 作为唯一 env 源"
   fi
 done
 
@@ -280,6 +304,8 @@ fi
 
 for rel_path in \
   "docker-compose.prod.yml" \
+  "scripts/setup.sh" \
+  "scripts/env-sync-local.sh" \
   "deploy/scripts/compose-prod.sh" \
   "deploy/scripts/preflight.sh" \
   "deploy/scripts/deploy.sh" \
@@ -288,8 +314,8 @@ for rel_path in \
   "deploy/scripts/version.sh" \
   "deploy/scripts/pg-check.sh" \
   "deploy/scripts/rollback.sh" \
+  "deploy/scripts/env-sync.sh" \
   ".github/workflows/deploy.yml" \
-  "deploy/env/app.prod.env.example" \
   "deploy/env/app.env.example"
 do
   if cmp -s "$TEMPLATE_DIR/$rel_path" "$SKILL_DIR/assets/template/$rel_path"; then
