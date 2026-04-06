@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXAMPLE_FILE="$ROOT_DIR/deploy/env/app.env.example"
-TARGET_FILE="$ROOT_DIR/.env"
+TARGET_FILE="$ROOT_DIR/deploy/env/app.dev.env"
 
 if [[ ! -f "$EXAMPLE_FILE" ]]; then
   echo "缺少示例文件：$EXAMPLE_FILE"
@@ -11,6 +11,7 @@ if [[ ! -f "$EXAMPLE_FILE" ]]; then
 fi
 
 if [[ ! -f "$TARGET_FILE" ]]; then
+  mkdir -p "$(dirname "$TARGET_FILE")"
   cp "$EXAMPLE_FILE" "$TARGET_FILE"
   echo "已生成 $TARGET_FILE"
   exit 0
@@ -162,9 +163,9 @@ for example_group in "${example_groups[@]}"; do
 done
 
 if [[ "$inserted_any" == false ]]; then
-  echo ".env 已与 deploy/env/app.env.example 对齐，无需追加。"
+  echo "app.dev.env 已与 deploy/env/app.env.example 对齐，无需追加。"
   exit 0
 fi
 
 mv "$tmp_file" "$TARGET_FILE"
-printf '已根据 deploy/env/app.env.example 向 .env 按分组补齐缺失变量：%s\n' "$(IFS=,; echo "${missing_keys[*]}")"
+printf '已根据 deploy/env/app.env.example 向 app.dev.env 按分组补齐缺失变量：%s\n' "$(IFS=,; echo "${missing_keys[*]}")"

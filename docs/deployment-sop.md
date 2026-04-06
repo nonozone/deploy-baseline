@@ -53,7 +53,10 @@ deploy/
 要求：
 
 - `deploy/README.md` 为项目部署文档入口
-- `deploy/env/` 只放样例文件，不放真实密钥
+- `deploy/env/app.env.example` 为唯一 canonical env 示例来源
+- 本地开发默认使用 `deploy/env/app.dev.env`
+- 生产部署默认使用 `deploy/env/app.prod.env`
+- 仓库中不提交真实密钥
 - `deploy/scripts/` 放可执行脚本
 
 如果项目还需要状态型服务自检，也可以增加：
@@ -118,9 +121,12 @@ make prod-env-sync
 
 要求：
 
-- 只追加真实 `.env` 或 `app.prod.env` 中缺失的 key
+- 开发态默认同步 `deploy/env/app.dev.env`
+- 生产态默认同步 `deploy/env/app.prod.env`
+- 只追加真实 env 文件中缺失的 key
 - 不覆盖已有值
 - 在部署检查中能明确提示 example 与真实 env 的结构漂移
+- 如果检测到历史根目录 `.env` 且 `deploy/env/app.dev.env` 尚不存在，允许在 `make setup` 中复制一次并给出明确迁移提示
 
 部署前至少检查以下内容：
 

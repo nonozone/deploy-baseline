@@ -1,0 +1,49 @@
+name: ${COMPOSE_PROJECT_NAME:-sampleapp}
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-sampleapp}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-me-in-production}
+      POSTGRES_DB: ${DB_NAME:-sampleapp}
+      PGDATA: /var/lib/postgresql/18/docker
+    volumes:
+      - pgdata_prod:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${APP_IMAGE:-sampleapp:prod}
+    restart: unless-stopped
+    env_file:
+      - ./deploy/env/app.prod.env
+    environment:
+      APP_ENV: production
+      APP_INTERNAL_PORT: ${APP_INTERNAL_PORT:-8000}
+      APP_HEALTHCHECK_PATH: ${APP_HEALTHCHECK_PATH:-/health}
+      DB_HOST: db
+      DB_PORT: 5432
+      WAIT_FOR_DB: ${WAIT_FOR_DB:-true}
+      RUN_DB_MIGRATIONS: ${RUN_DB_MIGRATIONS:-false}
+      DB_WAIT_TIMEOUT: ${DB_WAIT_TIMEOUT:-60}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${APP_PUBLISH_IP:-127.0.0.1}:${APP_PUBLISH_PORT:-8000}:${APP_INTERNAL_PORT:-8000}"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:${APP_INTERNAL_PORT:-8000}${APP_HEALTHCHECK_PATH:-/health} >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata_prod:

@@ -9,6 +9,12 @@ Inspect a target directory, identify deployable surfaces, then plan baseline gen
 
 Keep the user interaction simple: analyze first, ask once, then execute.
 
+Product stance:
+
+- prefer converging the target project toward the deploy baseline
+- do not preserve local variance by default
+- record necessary deviations as explicit `exceptions`
+
 ## Workflow
 
 1. Resolve the repository root before planning any edits.
@@ -44,11 +50,13 @@ Examples of decisions the user can confirm (or override) inside the single confi
 ## Execution Rules
 
 - Treat the baseline structure as the target outcome.
+- Prefer replacing project-local drift with the baseline shape unless a necessary exception applies.
 - Apply baseline actions per unit; **same repository does not imply same deploy target**.
 - Do not Dockerize `external-static-hosting` units by default.
 - Treat `external-platform` units as first-class surfaces, but do not force them into Docker/Compose convergence.
 - For `provider-managed` units, preserve or introduce provider config/manifests and document deploy, local dev (if applicable), secrets ownership, and rollback boundaries.
 - Prefer migrating or preserving project-specific logic over deleting it silently.
+- If a project detail cannot be normalized safely, surface it explicitly as an `exception` instead of quietly retaining drift.
 - Use the bundled template as the default skeleton for new files.
 - Adapt the template instead of copying it blindly when the project already has meaningful deployment logic.
 - Generate deployment docs from the baseline SOP plus project-specific facts discovered during scanning.
@@ -60,8 +68,9 @@ Examples of decisions the user can confirm (or override) inside the single confi
 - Do not stop at file generation. Always verify the resulting deployment surface.
 - Prefer additive or merge-style edits for existing system-facing config such as reverse proxies or service units.
 - Full-file replacement of system-facing config is only allowed when the user explicitly chooses **forced convergence for that unit**.
-- Keep env examples grouped by concern and clearly separate local or dev files from production files.
+- Keep env examples grouped by concern and clearly separate `deploy/env/app.dev.env` from `deploy/env/app.prod.env`.
 - When an existing `deploy/env/app.prod.env` is present, prefer non-destructive env sync that inserts missing keys by example-group order instead of overwriting the file.
+- If a legacy root `.env` exists and `deploy/env/app.dev.env` does not, copy it once during setup and state clearly that this is a migration bridge.
 - When introducing a new env layout or new deploy env files into an existing project, first inspect the current env files and migrate valid values forward; never replace an existing `.env`, `.env.local`, or deploy env file wholesale just because the baseline uses a different layout.
 - Always state the rollback unit per deployment unit: git ref, image tag, provider release, or manual restore boundary.
 - If database migrations exist, document rollback boundaries explicitly instead of implying full reversibility.
@@ -118,4 +127,5 @@ The deployment unit matrix should be operator-readable (table or bullet rows) an
 ## Bundled Resources
 
 - `scripts/detect-root.sh` performs a deterministic upward scan for likely project roots.
-- `assets/template/` contains the baseline skeleton to adapt for generated files.
+- `assets/template/` contains the packaged baseline skeleton derived from `src/template/`.
+- `product.md` summarizes the product stance for packaged installations.

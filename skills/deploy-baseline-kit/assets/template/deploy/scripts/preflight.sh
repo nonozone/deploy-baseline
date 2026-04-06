@@ -83,8 +83,8 @@ if [[ ${#missing_example_keys[@]} -gt 0 ]]; then
   exit 1
 fi
 
-# 本地 .env 与单一 canonical env 示例同步检查（警告级，不阻断部署）
-LOCAL_ENV_FILE="$ROOT_DIR/.env"
+# 本地 app.dev.env 与单一 canonical env 示例同步检查（警告级，不阻断部署）
+LOCAL_ENV_FILE="$ROOT_DIR/deploy/env/app.dev.env"
 LOCAL_ENV_EXAMPLE="$CANONICAL_ENV_EXAMPLE"
 if [[ -f "$LOCAL_ENV_EXAMPLE" ]]; then
   missing_local_keys=()
@@ -98,10 +98,10 @@ if [[ -f "$LOCAL_ENV_EXAMPLE" ]]; then
     fi
   done < <(grep -E '^[A-Z0-9_]+=' "$LOCAL_ENV_EXAMPLE" || true)
   if [[ ${#missing_local_keys[@]} -gt 0 ]]; then
-    printf '[warning] .env 缺少 deploy/env/app.env.example 中的变量（建议执行 make local-env-sync）：%s\n' \
+    printf '[warning] deploy/env/app.dev.env 缺少 deploy/env/app.env.example 中的变量（建议执行 make local-env-sync）：%s\n' \
       "$(IFS=,; echo "${missing_local_keys[*]}")"
   elif [[ ! -f "$LOCAL_ENV_FILE" ]]; then
-    echo "[warning] 未找到 .env 文件，建议先执行 make setup。"
+    echo "[warning] 未找到 deploy/env/app.dev.env，建议先执行 make setup。"
   fi
 fi
 

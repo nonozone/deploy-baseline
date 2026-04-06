@@ -5,7 +5,7 @@ SHELL := /bin/bash
 BOLD  := \033[1m
 RESET := \033[0m
 
-ENV_FILE ?= .env
+ENV_FILE ?= deploy/env/app.dev.env
 PROD_ENV_FILE ?= deploy/env/app.prod.env
 APP_SERVICE ?= app
 DB_SERVICE ?= db
@@ -29,7 +29,7 @@ setup: ## 初始化本地开发环境
 
 init: setup ## 首次初始化
 
-local-env-sync: ## 非破坏性补齐本地 .env 缺失项
+local-env-sync: ## 非破坏性补齐本地 app.dev.env 缺失项
 	bash scripts/env-sync-local.sh
 
 prod-env-sync: ## 非破坏性补齐生产 app.prod.env 缺失项

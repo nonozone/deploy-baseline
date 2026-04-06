@@ -1,4 +1,4 @@
-# Documentation Guide
+# Deploy Baseline Kit Docs
 
 [中文](#中文) | [English](#english)
 
@@ -14,39 +14,40 @@
 
 如果你是第一次接触这个仓库，建议按下面顺序阅读：
 
-1. `docs/v1-release.md`
+1. `docs/deploy-baseline-kit.md`
 2. `docs/baseline-standard.md`
 3. `docs/deployment-sop.md`
-4. `docs/deploy-baseline-kit.md`
-5. `docs/roadmap-v1.1.md`
+4. `docs/v1-release.md`
 
-如果你是要直接把这套基线接入到真实项目里，建议这样走：
+如果你是要把这个 skill 用到真实项目里，建议这样走：
 
 1. 先看 `docs/baseline-standard.md`，理解这套基线要求项目收敛成什么样
 2. 再看 `docs/deployment-sop.md`，理解部署文档和操作流程的标准形状
-3. 如果你打算手工复制模板，再看 `template/` 和 `template/deploy/README.md`
-4. 如果你打算让 Codex 自动识别并改造项目，再看 `docs/deploy-baseline-kit.md` 和 `skills/deploy-baseline-kit/SKILL.md`
+3. 再看 `skills/deploy-baseline-kit/SKILL.md`，理解实际执行规则
+4. 如果你要维护这套产品本身，再看 `src/template/`、`src/rules/` 和 `internal/`
 
 ### 文档地图
 
 - `docs/baseline-standard.md`
-  基线标准本体，定义统一命令面、Compose 结构、环境变量和部署目录约定。
+  基线标准本体，定义 skill 要把目标项目收敛成什么形状。
 - `docs/v1-release.md`
-  v1 发布说明，适合第一次了解这个仓库的读者快速理解定位、边界和推荐命令。
+  历史发布说明，适合理解仓库之前的定位与边界。
 - `docs/deployment-sop.md`
   通用部署 SOP，定义项目级部署文档应该覆盖哪些章节和操作步骤。
 - `docs/deploy-baseline-kit.md`
-  `deploy-baseline-kit` 的行为边界、稳定支持范围和确认模型说明。
-- `docs/roadmap-v1.1.md`
-  仓库后续演进方向和优先级。
-- `docs/superpowers/specs/`
+  `deploy-baseline-kit` 的产品边界、确认模型和收敛行为说明。
+- `skills/deploy-baseline-kit/SKILL.md`
+  skill 的安装入口与执行契约。
+- `internal/specs/2026-04-06-deploy-baseline-kit-productization-design.md`
+  当前产品化收敛设计。
+- `internal/specs/`
   skill 设计规格，适合需要继续演进 skill 的维护者阅读。
-- `docs/superpowers/plans/`
+- `internal/plans/`
   已拆解的实现计划，适合继续推进具体 phase 的维护者阅读。
 
-### 什么时候看 skill 设计文档
+### 什么时候看内部设计文档
 
-以下情况建议继续读 `docs/superpowers/specs/` 与 `docs/superpowers/plans/`：
+以下情况建议继续读 `internal/specs/` 与 `internal/plans/`：
 
 - 你要继续扩 `deploy-baseline-kit`
 - 你要补新的数据库产品线
@@ -65,18 +66,17 @@
 
 If this is your first time in the repository, read in this order:
 
-1. `docs/v1-release.md`
+1. `docs/deploy-baseline-kit.md`
 2. `docs/baseline-standard.md`
 3. `docs/deployment-sop.md`
-4. `docs/deploy-baseline-kit.md`
-5. `docs/roadmap-v1.1.md`
+4. `docs/v1-release.md`
 
-If you want to apply the baseline to a real project, use this path:
+If you want to use the skill on a real project, use this path:
 
 1. Read `docs/baseline-standard.md` to understand the target baseline shape
 2. Read `docs/deployment-sop.md` to understand the expected deployment-doc structure
-3. If you will copy the template manually, inspect `template/` and `template/deploy/README.md`
-4. If you want Codex to inspect and converge a project automatically, continue with `docs/deploy-baseline-kit.md` and `skills/deploy-baseline-kit/SKILL.md`
+3. Read `skills/deploy-baseline-kit/SKILL.md` to understand the installed behavior contract
+4. Inspect `src/template/`, `src/rules/`, and `internal/` only when you are maintaining the product itself
 
 ### Document Map
 
@@ -88,16 +88,16 @@ If you want to apply the baseline to a real project, use this path:
   The generic deployment SOP that project-specific deploy docs should follow.
 - `docs/deploy-baseline-kit.md`
   Behavior boundaries, stability notes, and confirmation semantics for `deploy-baseline-kit`.
-- `docs/roadmap-v1.1.md`
-  Near-term roadmap and optimization priorities.
-- `docs/superpowers/specs/`
+- `skills/deploy-baseline-kit/SKILL.md`
+  The skill entrypoint and execution contract.
+- `internal/specs/`
   Design specs for maintainers evolving the skill.
-- `docs/superpowers/plans/`
+- `internal/plans/`
   Implementation plans for concrete follow-up phases.
 
 ### When To Read The Skill Specs
 
-Continue into `docs/superpowers/specs/` and `docs/superpowers/plans/` when you need to:
+Continue into `internal/specs/` and `internal/plans/` when you need to:
 
 - extend `deploy-baseline-kit`
 - add more database baselines

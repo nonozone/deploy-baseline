@@ -1,10 +1,10 @@
-# Deploy Baseline
+# Deploy Baseline Kit
 
 [中文](#中文说明) | [English](#english)
 
-部署基线：一套可迁移的容器部署与 `Make` 通用基线，用于在不同项目之间复用一致的开发、构建、测试与部署入口。
+`deploy-baseline-kit` 是一个可安装的 skill 产品，用于识别真实项目、说明它与部署基线的差距，并把项目尽可能收敛到统一的 deploy baseline 结构。
 
-Deploy Baseline is a reusable deployment baseline for containerized projects, including monorepos with mixed deployment surfaces (self-hosted services, externally hosted static sites, and provider-managed platform units). It provides a consistent `Make`-based interface, layered Docker Compose structure, deployment SOPs, and a copyable project template.
+`deploy-baseline-kit` is an installable skill product for inspecting real repositories, explaining baseline gaps, and converging projects toward a standardized deployment baseline.
 
 ## 中文说明
 
@@ -14,204 +14,134 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 - 发布时间：`2026-04-05`
 - Release：`https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
 
-### 项目定位
+### 产品定位
 
-这个仓库不是业务项目本身，而是一套可以被复制、裁剪、再落地到真实项目中的通用资产，目标是统一：
+这个仓库应被理解为一个 skill 产品仓库，而不是“模板仓库顺带附带一个 skill”。
 
-- 顶层 `Makefile` 命令入口
-- 容器部署分层结构
-- 部署文档与 SOP 结构
-- 新项目初始化时的模板骨架
+主场景：
 
-这套基线吸收了真实项目里反复验证过的模式，例如：
+- 识别已有项目的部署结构
+- 说明项目与 deploy baseline 的差距
+- 在一次主要确认后，把项目尽可能收敛到统一基线
 
-- 后端走 Docker、前端本地热更新的混合开发方式
-- 后端容器化发布、前端静态发布的分离式部署方式
-- 状态型服务的发布前检查脚本
-- 启动契约变量与健康检查约定
+次场景：
+
+- 为近空项目生成同一套基线骨架
+
+当前产品原则：
+
+- 优先让目标项目靠近基线，而不是优先兼容历史差异
+- `deploy-baseline-kit` 是主入口
+- `src/` 是单一真源
+- 无法安全收敛的差异必须显式记录为 `exceptions`
 
 ### 仓库结构
 
-- `docs/README.md`：文档入口与推荐阅读顺序
-- `docs/baseline-standard.md`：通用基线规范
-- `docs/deployment-sop.md`：通用部署 SOP
-- `docs/v1-release.md`：v1 的定位、核心命令和适用边界
-- `docs/deploy-baseline-kit.md`：`deploy-baseline-kit` 的实际行为边界与稳定支持范围说明
-- `docs/roadmap-v1.1.md`：下一阶段的优化方向、优先级和任务清单
-- `skills/deploy-baseline-kit/`：用于识别项目并生成/收敛部署基线的 Codex skill
-- `template/`：可复制到新项目中的模板骨架
-- `template/deploy/`：部署目录、示例环境变量和脚本
-- `template/scripts/`：本地开发、构建、测试等脚本占位
-- `fixtures/`：静态样板目录，用于记录项目分类、运行模式、推荐路径元信息，并支撑基础验证命令；`runnable/` 子目录则预留给未来可执行样板验证。
-
-`fixtures/` 记录候选项目形态的差异、期望模式和建议路径，仓库级别的验证命令将覆盖这些元信息，同时该层结构也为后续的 runnable/ 可执行样板提供承载空间。
+- `skills/deploy-baseline-kit/`
+  当前 skill 入口、安装契约与打包产物内容。
+- `src/template/`
+  基线模板真源。
+- `src/rules/`
+  skill 执行规则与 references 真源。
+- `src/docs/`
+  产品文档真源起点。
+- `docs/`
+  当前对外文档入口。
+- `internal/`
+  设计规格与实现计划，仅面向维护者。
+- `template/`
+  兼容输出目录，由 `src/template/` 刷新，不再是主入口。
+- `skills/deploy-baseline-kit/assets/template/`
+  skill 安装包内的兼容模板输出，由 `src/template/` 刷新。
+- `skills/deploy-baseline-kit/references/`
+  skill 安装包内的兼容规则输出，由 `src/rules/references/` 刷新。
+- `dist/`
+  自包含打包产物目录。
 
 ### 推荐阅读顺序
 
-建议优先从 [docs/README.md](./docs/README.md) 进入。
+建议先从 [docs/README.md](./docs/README.md) 进入。
 
 最短阅读路径：
 
-1. `docs/v1-release.md`
+1. `docs/deploy-baseline-kit.md`
 2. `docs/baseline-standard.md`
 3. `docs/deployment-sop.md`
-4. `docs/deploy-baseline-kit.md`
-5. `docs/roadmap-v1.1.md`
+4. `skills/deploy-baseline-kit/SKILL.md`
 
-### 验证命令
-- `make verify-fixtures-static`：当前 Phase 1 只覆盖静态样板验证，命令会检查 `fixtures/` 下每个 `fixture.md` 是否满足预期字段。
-- `make verify-baseline`：统一的基础验证入口，目前只是执行静态样板检查，用于为将来的其它层级验证提供挂钩点。
+如果你是维护者，再继续看：
 
-### 模板默认提供
+1. `src/template/`
+2. `src/rules/`
+3. `internal/specs/`
+4. `internal/plans/`
 
-- 标准 `Makefile`
-- 三层 Compose 结构
-- 本地脚本目录
-- 部署脚本目录
-- 中文部署文档模板
-- GitHub Actions 工作流模板
+### 使用方式
 
-模板不会替你决定业务技术栈，只负责提供统一工程接口与部署骨架。
+推荐把它当成目标项目中的安装型 skill 使用：
 
-### 建议使用方式
-
-1. 先阅读 `docs/baseline-standard.md`
-2. 再阅读 `docs/deployment-sop.md`
-3. 如果要用 Codex 自动改造项目，再阅读 `docs/deploy-baseline-kit.md`
-4. 如需了解后续演进方向，可参考 `docs/roadmap-v1.1.md`
-5. 复制 `template/` 到目标项目，或在目标项目中调用 `deploy-baseline-kit`
-6. 替换模板中的项目名、服务名、镜像名、端口和启动命令
-7. 明确目标项目采用的本地运行模式与服务发布拆分方式
-8. 按目标项目情况补齐 `deploy/README.md`、环境变量和脚本实现
-9. 基于本仓库的 SOP 生成该项目自己的部署规范
-
-### Codex Skill
-
-仓库内提供了一个主 skill：`deploy-baseline-kit`。
-
-它适用于以下场景：
-
-- 从空目录或近似空目录生成部署基线骨架
-- 对已有项目做部署基线识别、差距分析和结构收敛
-- 自动判断项目根目录、运行模式和数据库类型
-- 在一次确认后完成生成或改造，而不是逐文件反复确认
-
-这个 skill 的主入口在 `skills/deploy-baseline-kit/SKILL.md`，设计说明在 `docs/superpowers/specs/2026-03-26-monorepo-mixed-deployment-surfaces-design.md`，行为边界说明在 `docs/deploy-baseline-kit.md`。
-
-当前仓库内与 skill 对齐更新的文档包括：
-
-- `docs/README.md`
-- `docs/deploy-baseline-kit.md`
-- `skills/deploy-baseline-kit/references/document-generation.md`
-- `template/deploy/README.md`
-
-当前这套 skill 的增强重点包括：
-
-- 改造后必须执行最低验证面，而不是只生成文件
-- 对反向代理、systemd、CI/CD 等系统级配置默认采用 merge 或追加策略
-- PostgreSQL 路线当前最稳定，其他数据库类型已纳入设计但仍待更多真实项目验证
-- env 模板要求按关注点分组，并明确区分本地开发与生产部署
-
-推荐用法：
-
-1. 在目标项目根目录或其子目录中运行 Codex
+1. 在目标项目根目录或子目录中运行 Codex
 2. 显式调用 `deploy-baseline-kit`
-3. 先查看 skill 输出的识别结果和改造方案
-4. 确认后再让它执行实际文件修改
+3. 先查看识别结果、部署单元矩阵、命令面矩阵与 `exceptions`
+4. 在唯一确认点确认方案
+5. 让 skill 完成收敛并执行最低验证
 
-如果要让本地 Codex 自动发现这个 skill，可将 `skills/deploy-baseline-kit/` 安装或链接到 `~/.codex/skills/deploy-baseline-kit`，然后重启 Codex。
+手工编辑 `src/template/` 只适用于维护这个产品本身，不应再作为普通用户的主使用路径。
 
-如果本地 Codex 使用的是软链接方式安装，例如：
+### env 约定
 
-- `~/.codex/skills/deploy-baseline-kit -> /path/to/deploy-baseline/skills/deploy-baseline-kit`
+env 路径已经统一为：
 
-那么后续只需要更新仓库里的 `skills/deploy-baseline-kit/`，本地安装目录就会自动跟随更新。通常只需要重启 Codex 或开启新会话，就能让新版本 skill 生效。
+- `deploy/env/app.env.example`
+  唯一 canonical env 示例来源。
+- `deploy/env/app.dev.env`
+  本地开发默认 env 文件，`make dev` 默认读取它。
+- `deploy/env/app.prod.env`
+  生产部署 env 文件。
 
-如果本地 Codex 使用的是直接复制安装，而不是软链接，那么每次更新仓库里的 skill 后，还需要手动把最新版本再次复制到 `~/.codex/skills/deploy-baseline-kit`。
+迁移规则：
 
-当前更稳定、支持最完整的路线是 PostgreSQL 项目；其他数据库类型已经纳入设计，但仍以真实项目需求和后续验证为主。
+- `make setup` 会优先基于 `deploy/env/app.env.example` 创建 `deploy/env/app.dev.env`
+- 如果检测到历史根目录 `.env`，且 `deploy/env/app.dev.env` 尚不存在，会自动复制一份并给出明确提示，作为一次性平滑迁移
+- `make local-env-sync` 与 `make prod-env-sync` 只补齐缺失 key，不覆盖已有值
 
-建议的最低验证面至少包括：
+### 构建、打包与验证
 
-- 按部署单元执行最低验证面（每个 unit 的验证面不同，不应按全仓库单一路径假定）
-- 对 `self-hosted` 单元：`bash -n`（新增/修改过的 shell）、`docker compose config`（该单元纳入 Compose 时）、`make help`（命令面）、如果已有 `build/test/typecheck` 则执行、检查生产 Compose 的 `healthcheck`/env 引用与该单元回滚边界说明
-- 对 `external-static-hosting` 单元：验证 build 命令与输出目录、路由/base path 假设、env 合约（build-time vs runtime）与托管说明（不默认 Dockerize）
-- 对 `external-platform` 单元：验证 manifest/config、deploy/local-dev 命令、secrets/ownership 边界与 rollback boundary 文档化（不强制 Compose）
+常用命令：
 
-手工使用 `template/` 和使用 `deploy-baseline-kit` 并不冲突：
+- `make build-skill`
+  基于单一真源构建 skill 产物，并刷新兼容输出。
+- `make package`
+  生成自包含 skill 包。
+- `make install-local`
+  安装到本地 Codex skills 目录。
+- `make sync-compat`
+  将 `src/template/` 刷新到兼容模板目录。
+- `make sync-rules`
+  将 `src/rules/references/` 刷新到 skill references 兼容目录。
+- `make verify`
+  执行仓库级一致性校验。
 
-- `template/` 适合手工复制和定制
-- `deploy-baseline-kit` 适合让 Codex 自动分析并生成/改造目标项目
+### 最低验证面
 
-### 统一命令约定
+当前基线要求至少覆盖：
 
-建议项目统一保留以下顶层入口：
-
-- `make dev`
-- `make build`
-- `make test`
-- `make deploy`
-- `make rollback`
-- `make logs`
-
-项目可以扩展自己的子命令，但不应破坏这组统一入口。
-
-对 monorepo / 多单元项目，还应同时承认“单元级命令面”：
-
-- 根 `Makefile` 负责项目级统一入口
-- 子项目可以保留自己的 `dev/build/test/typecheck/migrate`
-- 不要求把所有子项目命令提升到根 `Makefile`
-- 不要假设每个子项目都有 `dev`
-
-建议为这些顶层命令赋予稳定语义：
-
-- `make dev`：项目默认开发入口。负责启动标准开发环境；在全量 Docker 模式下通常拉起完整开发栈，在混合开发模式下至少拉起容器侧依赖，并明确本地还需启动哪些进程。
-- `make build`：项目级默认构建入口。负责生成项目默认交付物，例如应用镜像、后端构建产物或前端静态资源。
-- `make test`：项目级默认测试入口。负责执行项目的默认测试集合，而不是只跑某个子模块的局部测试。
-- `make deploy`：标准发布入口。负责执行项目约定的发布链路；在 mixed-surface/monorepo 中可以按部署单元发布，并明确哪些单元不在该链路内。
-- `make rollback`：标准回滚入口。回滚边界应按部署单元定义（镜像 tag / 制品版本 / Git ref / provider release）；对不可回滚或不纳入回滚链路的单元必须明确写在文档里。
-- `make logs`：默认日志查看入口。负责查看项目主要应用服务的运行日志，而不是要求使用者先记住具体容器名。
-
-除了顶层入口，项目也可以保留一组常见辅助命令，方便用户发现和单独执行某个环节：
-
-- `make help`：显示所有可用命令与简要说明，建议作为命令发现入口。
-- `make setup`：初始化本地开发环境依赖。
-- `make init`：首次初始化入口，通常可复用 `setup`。
-- `make local-env-sync`：非破坏性补齐本地 `.env` 缺失变量，不覆盖已有值。每次 `make dev` 前自动执行。
-- `make prod-env-sync`：根据 `deploy/env/app.env.example` 非破坏性补齐 `deploy/env/app.prod.env` 缺失变量，不覆盖已有值。（`make env-sync` 为兼容别名）
-- `make up` / `make down`：单独启动或停止开发态容器。
-- `make deploy-check`：执行部署前检查，例如 Docker、Compose、环境文件、关键变量和挂载策略检查。
-- `make prod-up` / `make prod-down` / `make prod-logs`：面向生产态容器的兼容或显式操作入口。
-- `make db-up` / `make db-down` / `make db-shell`：面向数据库容器的辅助入口。
-
-如果项目包含多个子应用或独立子链路，也可以扩展更细的子命令，例如：
-
-- `make build-admin`
-- `make build-web`
-- `make test-backend`
-- `make migrate`
-- `make seed`
-
-这些子命令的定位应当是“补充说明具体环节”，而不是替代统一顶层入口。
-
-回滚版本语义建议：
-
-- 生产发布应优先使用不可变版本标识
-- 容器镜像优先使用 Git Commit SHA 或语义化版本号作为 tag
-- 不建议把 `latest` 作为生产发布和回滚依据
-- `make rollback` 应显式回滚到某个具体版本，而不是“回到当前默认镜像”
-- 在 mixed-surface/monorepo 中，回滚边界必须按部署单元明确（以及哪些单元被排除在回滚链路之外）
+- shell 脚本 `bash -n`
+- 需要纳入 Compose 的 `self-hosted` 单元执行 `docker compose config`
+- `make help` 的命令面检查
+- 项目已有 `build/test/typecheck` 时执行现有健康检查
+- env 引用、`healthcheck` 与回滚边界检查
 
 ### 适用场景
 
-- 需要为多个项目统一部署约定
-- 想为团队建立一致的容器化交付骨架
-- 希望新项目快速拥有基础开发、测试与部署入口
-- 需要把部署经验沉淀为可复制模板而不是口头约定
+- 你要把已有项目收敛到统一部署接口
+- 你要给团队建立标准化的部署基线
+- 你希望用一次确认完成结构化生成或收敛
+- 你希望安装一个可复用的 skill，而不是维护多套散落模板
 
 ### 开源协议
 
-部署基线使用 `Apache-2.0` 协议。你可以在遵守协议的前提下自由使用、修改和分发。
+本项目使用 `Apache-2.0` 协议。详见 [`LICENSE`](./LICENSE)。
 
 ## English
 
@@ -221,198 +151,130 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 - Published on: `2026-04-05`
 - Release: `https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
 
-### What This Repository Is
+### Product Positioning
 
-This repository is not an application by itself. It is a reusable baseline that can be copied into real projects to standardize:
+This repository should be understood as a skill product repository, not as a template repository that happens to ship a skill.
 
-- top-level `Makefile` commands
-- layered container deployment structure
-- deployment documentation and SOPs
-- bootstrap template for new projects
+Primary use case:
 
-The baseline reflects patterns proven in real delivery work, including:
+- inspect an existing repository's deployment shape
+- explain the gap from the baseline
+- converge the repository toward the standard structure after one main confirmation
 
-- hybrid local development with Dockerized backend and hot-reload frontend
-- split deployment where backend is containerized and frontend is shipped as static assets
-- preflight checks for stateful services
-- startup contract variables and health-check conventions
+Secondary use case:
+
+- bootstrap a near-empty repository with the same baseline
+
+Product principles:
+
+- converge target projects toward the baseline instead of preserving local drift by default
+- `deploy-baseline-kit` is the front door
+- `src/` is the single source of truth
+- any deviation that cannot be normalized safely must be recorded as an explicit `exception`
 
 ### Repository Layout
 
-- `docs/README.md`: document index and recommended reading order
-- `docs/baseline-standard.md`: baseline standards and conventions
-- `docs/deployment-sop.md`: generic deployment SOP
-- `docs/deploy-baseline-kit.md`: behavior boundaries and stability notes for `deploy-baseline-kit`
-- `docs/roadmap-v1.1.md`: next-stage optimization priorities and task checklist
-- `skills/deploy-baseline-kit/`: Codex skill for generating or converging projects onto this deployment baseline
-- `template/`: copyable project skeleton
-- `template/deploy/`: deployment scripts, env examples, and deployment docs
-- `template/scripts/`: placeholders for local development, build, and test scripts
-- `fixtures/`: static fixture descriptions that anchor classification metadata ahead of runnable assets, with a `runnable/` subtree reserved for the future executable fixtures.
-
-`fixtures/` stores static descriptions of candidate project shapes, their expected runtime modes, and the guidance the baseline should provide; repo-level verification commands will cover this area to keep the metadata and layout consistent while leaving space for the `runnable/` subtree to house executable fixtures later.
+- `skills/deploy-baseline-kit/`
+  Live skill entry, install contract, and packaged skill content.
+- `src/template/`
+  Canonical baseline template source.
+- `src/rules/`
+  Canonical execution rules and references source.
+- `src/docs/`
+  Canonical product-doc source.
+- `docs/`
+  Product-facing repository docs.
+- `internal/`
+  Design specs and implementation plans for maintainers.
+- `template/`
+  Compatibility output refreshed from `src/template/`, not the primary product surface.
+- `skills/deploy-baseline-kit/assets/template/`
+  Compatibility template output for installed skill packages, refreshed from `src/template/`.
+- `skills/deploy-baseline-kit/references/`
+  Compatibility rules output for installed skill packages, refreshed from `src/rules/references/`.
+- `dist/`
+  Self-contained package output directory.
 
 ### Recommended Reading Order
 
-Start with [docs/README.md](./docs/README.md).
+Start from [docs/README.md](./docs/README.md).
 
-Shortest path:
+Shortest product path:
 
-1. `docs/baseline-standard.md`
-2. `docs/deployment-sop.md`
-3. `docs/deploy-baseline-kit.md`
-4. `docs/roadmap-v1.1.md`
+1. `docs/deploy-baseline-kit.md`
+2. `docs/baseline-standard.md`
+3. `docs/deployment-sop.md`
+4. `skills/deploy-baseline-kit/SKILL.md`
 
-### Verification Commands
-- `make verify-fixtures-static`: Phase 1 currently focuses solely on static fixture metadata validation, ensuring each `fixture.md` under `fixtures/` advertises the required fields.
-- `make verify-baseline`: The repository-level verification entry point that today delegates to the static fixture check but is ready to layer additional baseline checks once later phases expand the slice.
+Maintainer path:
 
-### What The Template Includes
+1. `src/template/`
+2. `src/rules/`
+3. `internal/specs/`
+4. `internal/plans/`
 
-- a standard `Makefile`
-- a three-layer Compose structure
-- local script directories
-- deployment script directories
-- deployment documentation templates
-- GitHub Actions workflow templates
+### How To Use It
 
-The template does not choose your application stack. It only provides a consistent engineering interface and deployment skeleton.
+Treat it as an installable skill inside the target project:
 
-### Recommended Adoption Flow
-
-1. Read `docs/baseline-standard.md`
-2. Read `docs/deployment-sop.md`
-3. Read `docs/deploy-baseline-kit.md` if you want Codex to inspect and transform the project for you
-4. Review `docs/roadmap-v1.1.md` if you want the current improvement roadmap
-5. Copy `template/` into the target project, or invoke `deploy-baseline-kit` from the target repo
-6. Replace placeholders for project name, service name, image name, ports, and startup commands
-7. Decide the local runtime model and deployment split for the target project
-8. Fill in `deploy/README.md`, environment files, and script implementations
-9. Derive a project-specific deployment standard from this baseline
-
-### Codex Skill
-
-This repository also ships one primary skill: `deploy-baseline-kit`.
-
-Use it when you want Codex to:
-
-- generate a deployment baseline from an empty or near-empty directory
-- inspect an existing project and converge it toward this baseline
-- infer the real project root, runtime mode, and database type
-- present one plan first, then apply changes after a single confirmation
-
-The main entry is `skills/deploy-baseline-kit/SKILL.md`, the design spec lives at `docs/superpowers/specs/2026-03-26-monorepo-mixed-deployment-surfaces-design.md`, and the runtime behavior notes live at `docs/deploy-baseline-kit.md`.
-
-The repository docs kept in sync with the skill include:
-
-- `docs/README.md`
-- `docs/deploy-baseline-kit.md`
-- `skills/deploy-baseline-kit/references/document-generation.md`
-- `template/deploy/README.md`
-
-The current enhancement focus for this skill is:
-
-- enforce post-edit verification instead of stopping at file generation
-- protect system-facing config such as reverse proxies, service units, and CI/CD files by defaulting to merge-style edits
-- treat PostgreSQL as the most mature path today while keeping other database families as designed-but-still-validating paths
-- keep env templates grouped by concern and clearly separated between local development and production deployment
-
-Recommended usage:
-
-1. Run Codex from the target project root or any child directory
+1. Run Codex from the target repository root or any child directory
 2. Explicitly invoke `deploy-baseline-kit`
-3. Review the detected state and proposed transformation plan
-4. Confirm once, then let the skill apply the file changes
+3. Review the detected state, deployment-unit matrix, command-surface matrix, and `exceptions`
+4. Confirm once
+5. Let the skill converge the project and run the minimum verification surface
 
-To make the skill auto-discoverable for a local Codex installation, install or symlink `skills/deploy-baseline-kit/` into `~/.codex/skills/deploy-baseline-kit`, then restart Codex.
+Directly editing `src/template/` is for product maintenance, not for normal adoption.
 
-If the local Codex installation uses a symlink, for example:
+### Env Contract
 
-- `~/.codex/skills/deploy-baseline-kit -> /path/to/deploy-baseline/skills/deploy-baseline-kit`
+The env layout is standardized as:
 
-then updating the repository copy under `skills/deploy-baseline-kit/` is enough. The local skill will follow automatically, and a Codex restart or a new session is usually enough to pick up the new version.
+- `deploy/env/app.env.example`
+  The single canonical env example source.
+- `deploy/env/app.dev.env`
+  The default local-development env file used by `make dev`.
+- `deploy/env/app.prod.env`
+  The production deployment env file.
 
-If the local Codex installation uses a copied directory instead of a symlink, you must manually copy the updated skill into `~/.codex/skills/deploy-baseline-kit` after repository updates.
+Migration rules:
 
-The most stable and complete path today is PostgreSQL-based projects; other database families are designed for but still need more real-project validation.
+- `make setup` initializes `deploy/env/app.dev.env` from `deploy/env/app.env.example`
+- if a legacy root `.env` exists and `deploy/env/app.dev.env` does not, setup copies it once and prints a clear migration notice
+- `make local-env-sync` and `make prod-env-sync` only fill missing keys and never overwrite existing values
 
-The recommended minimum verification surface includes:
+### Build, Package, And Verify
 
-- per-unit verification paths (different unit types have different minimum checks; do not assume one repo-wide Compose-only path)
-- for `self-hosted` units: `bash -n` (new/modified shell scripts), `docker compose config` (when that unit is in Compose), `make help` (command surface), existing `build/test/typecheck` when present, and production Compose `healthcheck`/env references plus the unit's rollback-boundary notes
-- for `external-static-hosting` units: build command + output directory, routing/base-path assumptions, env contract (build-time vs runtime), and hosting notes (do not Dockerize by default)
-- for `external-platform` units: manifest/config, deploy/local-dev commands, secrets/ownership boundaries, and rollback-boundary documentation (do not force Compose)
+Common commands:
 
-Manual use of `template/` and automated use of `deploy-baseline-kit` are complementary:
+- `make build-skill`
+  Build the skill from the canonical sources and refresh compatibility outputs.
+- `make package`
+  Produce a self-contained skill package.
+- `make install-local`
+  Install the skill into the local Codex skills directory.
+- `make sync-compat`
+  Refresh compatibility template outputs from `src/template/`.
+- `make sync-rules`
+  Refresh compatibility rule outputs from `src/rules/references/`.
+- `make verify`
+  Run repository-level consistency checks.
 
-- `template/` is the direct copy-and-customize path
-- `deploy-baseline-kit` is the analyze-and-generate or analyze-and-converge path
+### Minimum Verification Surface
 
-### Standard Command Contract
+The baseline currently expects at least:
 
-Projects are encouraged to keep these top-level commands:
-
-- `make dev`
-- `make build`
-- `make test`
-- `make deploy`
-- `make rollback`
-- `make logs`
-
-Projects may extend the command set, but should preserve this common entry surface.
-
-These top-level commands should keep stable meanings across projects:
-
-- `make dev`: the default local development entry. In full Docker mode it usually starts the full dev stack; in hybrid mode it should at least start containerized dependencies and make the remaining local processes explicit.
-- `make build`: the project-wide default build entry. It should produce the default deliverable, such as an app image, backend artifact, or frontend static bundle.
-- `make test`: the project-wide default test entry. It should run the default test surface for the project, not just one narrow submodule.
-- `make deploy`: the standard release entry for the project's defined deployment paths; in mixed-surface repos it may deploy one or more deployment units, and units outside the unified path must be explicitly documented.
-- `make rollback`: the standard rollback entry. Rollback boundaries must be defined per deployment unit (image tag, artifact version, Git revision, provider release). Units that cannot be rolled back or are excluded from rollback must be explicitly documented.
-- `make logs`: the default log-viewing entry for the main application service, so users do not need to memorize container names first.
-
-For monorepos and multi-unit repositories, also keep a separate unit-level command surface:
-
-- the root `Makefile` remains the project-level unified entry
-- unit-level packages or services may keep their own `dev/build/test/typecheck/migrate` commands
-- not every unit needs a `dev` script
-- do not force every unit command into the root `Makefile`
-
-Projects can also expose common helper commands so users can discover and run one step in isolation when needed:
-
-- `make help`: list available commands and short descriptions; this should be the command discovery entry.
-- `make setup`: initialize local development prerequisites.
-- `make init`: first-time initialization entry, often reusing `setup`.
-- `make local-env-sync`: insert missing keys from `deploy/env/app.env.example` into `.env` without overwriting existing values. Runs automatically before each `make dev`.
-- `make prod-env-sync`: insert missing keys from `deploy/env/app.env.example` into `deploy/env/app.prod.env` by example group order when possible, without overwriting existing values. (`make env-sync` is a compatibility alias.)
-- `make up` / `make down`: start or stop development containers without running the full `dev` flow.
-- `make deploy-check`: run pre-deployment checks for Docker, Compose, env files, critical variables, and persistence settings.
-- `make prod-up` / `make prod-down` / `make prod-logs`: explicit or compatibility production-container operations.
-- `make db-up` / `make db-down` / `make db-shell`: helper commands for database container operations.
-
-If a project has multiple sub-apps or separate release tracks, it may also add narrower commands such as:
-
-- `make build-admin`
-- `make build-web`
-- `make test-backend`
-- `make migrate`
-- `make seed`
-
-These subcommands should clarify specific steps, not replace the shared top-level contract.
-
-Rollback version semantics:
-
-- production releases should prefer immutable version identifiers
-- container images should prefer Git commit SHA or semantic version tags
-- `latest` should not be used as the production release or rollback reference
-- `make rollback` should target an explicit version, not an implicit default image
-- in mixed-surface/monorepo repos, rollback boundaries should be explicit per unit (and exclusions should be documented)
+- `bash -n` for new or changed shell scripts
+- `docker compose config` for `self-hosted` units that are actually in Compose
+- `make help` command-surface verification
+- existing `build/test/typecheck` health checks when the project already has them
+- checks for env references, `healthcheck`, and rollback boundaries
 
 ### Good Fit For
 
-- teams standardizing deployment conventions across multiple repositories
-- projects that need a repeatable container delivery skeleton
-- new services that need a quick starting point for development, testing, and deployment
-- organizations turning deployment practice into reusable templates
+- converging existing projects onto a standardized deployment interface
+- establishing a standard deployment baseline across multiple repositories
+- using one confirmation gate to drive structured generation or convergence
+- shipping a reusable skill product instead of maintaining multiple drifting template paths
 
 ### License
 

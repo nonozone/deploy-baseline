@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DEV_ENV_FILE="$ROOT_DIR/deploy/env/app.dev.env"
 LOCAL_RUNTIME_MODE="${LOCAL_RUNTIME_MODE:-docker}"
 
 read_env_value() {
@@ -16,11 +17,11 @@ read_env_value() {
       print $0
       exit
     }
-  ' "$ROOT_DIR/.env"
+  ' "$DEV_ENV_FILE"
 }
 
-if [[ ! -f "$ROOT_DIR/.env" ]]; then
-  echo "缺少 .env，请先执行 make setup。"
+if [[ ! -f "$DEV_ENV_FILE" ]]; then
+  echo "缺少开发环境变量文件：$DEV_ENV_FILE，请先执行 make setup。"
   exit 1
 fi
 
@@ -68,5 +69,5 @@ EOF
 exec docker compose \
   -f "$ROOT_DIR/docker-compose.yml" \
   -f "$ROOT_DIR/docker-compose.dev.yml" \
-  --env-file "$ROOT_DIR/.env" \
+  --env-file "$DEV_ENV_FILE" \
   up --build

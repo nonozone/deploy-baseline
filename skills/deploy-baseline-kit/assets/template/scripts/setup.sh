@@ -3,12 +3,21 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXAMPLE_FILE="$ROOT_DIR/deploy/env/app.env.example"
+DEV_ENV_FILE="$ROOT_DIR/deploy/env/app.dev.env"
+LEGACY_ENV_FILE="$ROOT_DIR/.env"
 
-if [[ ! -f "$ROOT_DIR/.env" ]]; then
-  cp "$EXAMPLE_FILE" "$ROOT_DIR/.env"
-  echo "已根据 deploy/env/app.env.example 生成 .env，请按项目实际情况修改。"
+mkdir -p "$(dirname "$DEV_ENV_FILE")"
+
+if [[ ! -f "$DEV_ENV_FILE" ]]; then
+  if [[ -f "$LEGACY_ENV_FILE" ]]; then
+    cp "$LEGACY_ENV_FILE" "$DEV_ENV_FILE"
+    echo "检测到旧 .env，已复制生成 deploy/env/app.dev.env，请确认后继续使用新的开发环境变量路径。"
+  else
+    cp "$EXAMPLE_FILE" "$DEV_ENV_FILE"
+    echo "已根据 deploy/env/app.env.example 生成 deploy/env/app.dev.env，请按项目实际情况修改。"
+  fi
 else
-  echo ".env 已存在，跳过生成。"
+  echo "deploy/env/app.dev.env 已存在，跳过生成。"
 fi
 
 echo "请在 scripts/setup.sh 中补充项目实际初始化逻辑。"

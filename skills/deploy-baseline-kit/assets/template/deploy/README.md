@@ -70,6 +70,7 @@
 至少说明：
 
 - `deploy/env/app.env.example` 是唯一 canonical env 示例来源
+- 本地开发默认使用 `deploy/env/app.dev.env`
 - 真实生产变量来源
 - `deploy/env/app.prod.env` 中哪些变量必须替换
 - 哪些变量属于敏感信息
@@ -281,7 +282,8 @@ make dev
 
 说明：
 
-- `make setup` 会基于 `deploy/env/app.env.example` 初始化本地环境，并补齐 `.env` 与 `deploy/env/app.prod.env` 缺失项
+- `make setup` 会基于 `deploy/env/app.env.example` 初始化本地环境，并补齐 `deploy/env/app.dev.env` 与 `deploy/env/app.prod.env` 缺失项
+- 如果检测到历史遗留的根目录 `.env` 且 `deploy/env/app.dev.env` 尚不存在，会自动复制一份用于平滑迁移
 - `make dev` 会以前台方式启动开发环境，并在进入持续日志前统一显示应用首页、健康检查和 PostgreSQL 入口
 - 如果 `deploy/env/app.env.example` 后续新增了变量，可再次执行 `make local-env-sync`
 

@@ -3,6 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE_DIR="$ROOT_DIR/template"
+SOURCE_TEMPLATE_DIR="$ROOT_DIR/src/template"
+SOURCE_RULES_DIR="$ROOT_DIR/src/rules"
 SKILL_DIR="$ROOT_DIR/skills/deploy-baseline-kit"
 
 errors=0
@@ -26,6 +28,12 @@ done < <(find "$TEMPLATE_DIR/scripts" "$TEMPLATE_DIR/deploy/scripts" -name "*.sh
 
 # ── 2. 模板文件完整性 ────────────────────────────────────────────────
 header "模板文件完整性检查"
+if [[ -d "$SOURCE_TEMPLATE_DIR" ]]; then
+  pass "src/template"
+else
+  fail "缺少模板真源目录：src/template"
+fi
+
 required_template_files=(
   "Makefile"
   "Dockerfile"
@@ -61,8 +69,35 @@ for f in "${required_template_files[@]}"; do
   fi
 done
 
+header "真源与兼容目录一致性检查"
+if diff -qr "$SOURCE_TEMPLATE_DIR" "$TEMPLATE_DIR" >/dev/null 2>&1; then
+  pass "src/template 与 template 保持一致"
+else
+  fail "src/template 与 template 不一致"
+fi
+
+if diff -qr "$SOURCE_TEMPLATE_DIR" "$SKILL_DIR/assets/template" >/dev/null 2>&1; then
+  pass "src/template 与 skill 兼容模板保持一致"
+else
+  fail "src/template 与 skill 兼容模板不一致"
+fi
+
+if [[ -d "$SOURCE_RULES_DIR/references" ]]; then
+  pass "src/rules/references"
+else
+  fail "缺少规则真源目录：src/rules/references"
+fi
+
+if diff -qr "$SOURCE_RULES_DIR/references" "$SKILL_DIR/references" >/dev/null 2>&1; then
+  pass "src/rules/references 与 skill references 保持一致"
+else
+  fail "src/rules/references 与 skill references 不一致"
+fi
+
 # ── 3. 单一 canonical env 关键 key 完整性 ──────────────────────────
 header "单一 canonical env 关键变量检查"
+DEV_ENV_FILE="deploy/env/app.dev.env"
+PROD_ENV_FILE="deploy/env/app.prod.env"
 required_env_keys=(
   COMPOSE_PROJECT_NAME
   LOCAL_RUNTIME_MODE
@@ -88,7 +123,7 @@ else
 fi
 
 if [[ -f "$TEMPLATE_DIR/deploy/env/app.prod.env.example" ]]; then
-  fail "不允许保留 deploy/env/app.prod.env.example；本地与生产 env 必须共用 deploy/env/app.env.example"
+  fail "不允许保留 deploy/env/app.prod.env.example；开发与生产 env 必须共用 deploy/env/app.env.example"
 else
   pass "deploy/env/app.prod.env.example 已移除"
 fi
@@ -103,6 +138,26 @@ do
     pass "$script_path 使用单一 canonical env"
   else
     fail "$script_path 必须使用 deploy/env/app.env.example 作为唯一 env 源"
+  fi
+done
+
+if grep -Fq "$DEV_ENV_FILE" "$TEMPLATE_DIR/Makefile"; then
+  pass "Makefile 默认使用 $DEV_ENV_FILE"
+else
+  fail "Makefile 应默认使用 $DEV_ENV_FILE"
+fi
+
+for script_path in \
+  "scripts/setup.sh" \
+  "scripts/env-sync-local.sh" \
+  "scripts/dev.sh" \
+  "scripts/pg-check.sh" \
+  "deploy/scripts/preflight.sh"
+do
+  if grep -Fq "$DEV_ENV_FILE" "$TEMPLATE_DIR/$script_path"; then
+    pass "$script_path 使用 $DEV_ENV_FILE"
+  else
+    fail "$script_path 应使用 $DEV_ENV_FILE"
   fi
 done
 
@@ -147,6 +202,12 @@ if grep -Fq "应用首页：" "$TEMPLATE_DIR/scripts/dev.sh" \
   pass "template/scripts/dev.sh 输出应用与数据库访问地址"
 else
   fail "template/scripts/dev.sh 应输出应用首页、健康检查和 PostgreSQL 入口"
+fi
+
+if grep -Fq "./$DEV_ENV_FILE" "$TEMPLATE_DIR/docker-compose.dev.yml"; then
+  pass "docker-compose.dev.yml 使用 $DEV_ENV_FILE"
+else
+  fail "docker-compose.dev.yml 应使用 $DEV_ENV_FILE"
 fi
 
 if cmp -s "$TEMPLATE_DIR/scripts/dev.sh" "$SKILL_DIR/assets/template/scripts/dev.sh"; then

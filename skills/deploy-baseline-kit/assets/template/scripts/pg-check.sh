@@ -2,11 +2,11 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ENV_FILE="$ROOT_DIR/.env"
+ENV_FILE="$ROOT_DIR/deploy/env/app.dev.env"
 DB_SERVICE="${DB_SERVICE:-db}"
 
 if [[ ! -f "$ENV_FILE" ]]; then
-  echo "缺少 .env，请先执行 make setup。"
+  echo "缺少开发环境变量文件：$ENV_FILE，请先执行 make setup。"
   exit 1
 fi
 

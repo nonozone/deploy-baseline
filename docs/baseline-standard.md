@@ -223,17 +223,19 @@ project-root/
 
 强制规则：
 
-- 本地 `.env` 与生产 `deploy/env/app.prod.env` 都必须从 `deploy/env/app.env.example` 创建或同步
-- 不再允许维护本地 `.env.example` 与生产 `app.prod.env.example` 两套独立 example
+- 开发 `deploy/env/app.dev.env` 与生产 `deploy/env/app.prod.env` 都必须从 `deploy/env/app.env.example` 创建或同步
+- 不再允许维护根目录 `.env.example` 与生产 `app.prod.env.example` 两套独立 example
 - 如果需要引入新的 env 分层，也必须先说明迁移规则，再做非破坏性补齐
 
 ### 5.6 `deploy/env/*.env`
 
-负责真实运行时 env 文件，例如 `.env` 或 `deploy/env/app.prod.env`。
+负责真实运行时 env 文件，例如 `deploy/env/app.dev.env` 或 `deploy/env/app.prod.env`。
 
 建议：
 
 - `deploy/env/app.env.example` 承担完整的运行时、数据库与部署变量样例
+- 本地开发默认读取 `deploy/env/app.dev.env`
+- 如果存在历史根目录 `.env`，仅作为迁移来源，不再作为标准路径
 - 明确区分必填、可选与 provider-specific 变量
 - 明确占位规则：敏感值默认留空；可选高级镜像部署变量默认留空，文档中单独展示推荐 tag 格式；非敏感默认值可保留可运行示例，外部非敏感示例可使用 `example.com` 风格地址
 - 对状态型服务和验证相关变量单独分组
@@ -409,7 +411,7 @@ project-root/
 ### 7.2 约束规则
 
 - 单一 env 示例来源放在 `deploy/env/app.env.example`
-- 本地 `.env` 与生产 `deploy/env/app.prod.env` 都从它创建或同步
+- 开发 `deploy/env/app.dev.env` 与生产 `deploy/env/app.prod.env` 都从它创建或同步
 - 敏感信息不能提交进仓库
 - Compose 文件只引用变量，不写死密钥
 - 能提供默认值的变量，应明确写出默认值来源
@@ -578,7 +580,7 @@ project-root/
 说明：
 
 - `make deploy-check`：执行部署前检查
-- `make local-env-sync`：非破坏性补齐本地 `.env` 缺失变量
+- `make local-env-sync`：非破坏性补齐本地 `deploy/env/app.dev.env` 缺失变量
 - `make prod-env-sync`：根据 `deploy/env/app.env.example` 非破坏性补齐 `deploy/env/app.prod.env` 缺失变量
 - `make deploy`：执行标准部署
 - `make rollback`：执行标准回滚
@@ -647,10 +649,10 @@ project-root/
 
 新项目接入建议按下面顺序执行：
 
-1. 复制模板目录
-2. 替换项目名、服务名、镜像名、端口
-3. 替换模板脚本中的占位启动命令
-4. 填写 `deploy/env/app.env.example`
+1. 优先在目标项目中调用 `deploy-baseline-kit`
+2. 确认部署单元矩阵、命令面矩阵与收敛方案
+3. 填写 `deploy/env/app.env.example`
+4. 初始化 `deploy/env/app.dev.env` 与 `deploy/env/app.prod.env`
 5. 补写项目自己的 `deploy/README.md`
 6. 验证 `make dev`、`make build`、`make test`、`make deploy`
 
@@ -681,7 +683,7 @@ project-root/
 - Compose 分层清晰
 - 本地和部署变量分离
 - 部署文档可执行
-- 模板可复制
+- 基线可通过 skill 稳定交付
 - 文档全部使用中文
 - 本地运行模式有明确说明
 - 服务发布拆分方式有明确说明

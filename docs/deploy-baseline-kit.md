@@ -1,16 +1,24 @@
-# deploy-baseline-kit 使用与行为边界说明
+# deploy-baseline-kit 产品边界与行为说明
 
 ## 1. 这是什么
 
-`deploy-baseline-kit` 是 `deploy-baseline` 配套的主 skill，用于让 Codex 在目标项目中执行“识别现状 -> 输出方案 -> 确认后生成或收敛部署基线”的流程。
+`deploy-baseline-kit` 是这个仓库的主产品。它的目标不是“尽量迁就项目现状”，而是让 Codex 在目标项目中执行“识别现状 -> 输出短方案 -> 一次确认 -> 标准化收敛”的流程。
 
-它不是单纯的模板说明，也不是只做静态建议，而是一个可以实际介入项目结构整理的调用入口。
+它不是单纯的模板说明，也不是只做静态建议，而是一个可以实际介入项目结构标准化的 skill 产品。
 
 推荐先配合 `docs/README.md` 一起看：
 
-- `docs/README.md` 负责给出仓库级阅读入口
-- 本文负责说明 skill 的运行边界和当前稳定支持面
-- `skills/deploy-baseline-kit/SKILL.md` 与 `references/` 负责定义 skill 的实际执行规则
+- `docs/README.md` 负责给出产品文档入口
+- 本文负责说明 skill 的产品边界和当前稳定支持面
+- `skills/deploy-baseline-kit/SKILL.md` 与其配套 references 负责定义实际执行规则
+
+当前仓库正处于产品化收敛阶段：
+
+- `src/template/` 是新的模板真源起点
+- `src/docs/` 是新的产品文档真源起点
+- `src/rules/` 是新的产品规则真源起点
+- 旧 `template/` 与 `skills/deploy-baseline-kit/assets/template/` 暂时仍在，用于过渡兼容
+- 兼容模板目录应通过 `make sync-compat` 或 `make build-skill` 从 `src/template/` 刷新，而不是手工双写
 
 ## 2. 它在实际使用中会怎么处理项目
 
@@ -27,7 +35,7 @@
 9. 按部署单元执行最低验证（只做与该单元 hosting mode 匹配的验证，Compose 只覆盖 self-hosted 单元）
 10. 输出按部署单元拆分的结果摘要与残留风险
 
-这意味着它不是一上来就直接改文件，而是先分析，再给方案，再执行。
+这意味着它不是一上来就直接改文件，而是先分析，再给短方案，再执行。
 
 ## 3. 它会识别哪些部署单元状态
 
@@ -74,7 +82,7 @@
 
 ## 4. 它会不会直接改项目
 
-默认不会。
+默认不会在未确认前直接落盘。
 
 `deploy-baseline-kit` 的设计原则是：
 
@@ -83,7 +91,9 @@
 - 先说明风险
 - 再等待一次确认
 
-只有在开发者明确确认后，它才进入文件生成或结构收敛阶段。
+只有在开发者明确确认后，它才进入文件生成或结构收敛阶段，而且默认目标是让项目尽量靠近 deploy baseline。
+
+如果某些内容无法安全收敛，最终结果必须显式写成 `exceptions`，而不是悄悄保留成隐性偏差。
 
 它不会在未确认的情况下，直接对项目做大规模落盘修改。
 
@@ -106,7 +116,7 @@
 
 确认之后，skill 不再逐文件追问。
 
-但确认之后不代表“直接生成完就结束”，它还应继续做最低验证，并在最终结果里说明哪些验证已经完成、哪些没有完成。
+但确认之后不代表“直接生成完就结束”，它还应继续做最低验证，并在最终结果里说明哪些验证已经完成、哪些没有完成，以及哪些内容被保留为 `exceptions`。
 
 ### 5.1 矩阵化确认示例（单条确认消息内）
 
@@ -122,6 +132,8 @@
 
 - `Makefile`
 - `deploy/env/app.env.example`
+- `deploy/env/app.dev.env`
+- `deploy/env/app.prod.env`
 - `docker-compose.yml`
 - `docker-compose.dev.yml`
 - `docker-compose.prod.yml`
@@ -133,9 +145,10 @@
 
 处理原则是：
 
-- 新项目优先按模板生成
-- 轻量项目优先补齐和统一
-- 重度已有项目优先迁移和保留有效逻辑，而不是静默删除
+- 新项目优先按基线生成
+- 轻量项目优先补齐并收敛到标准路径
+- 重度已有项目优先迁移有效逻辑，而不是保留历史目录漂移
+- 历史路径可以迁移兼容，但不应继续作为主结构
 
 对于 monorepo 或多单元项目，还应额外遵守：
 
@@ -240,10 +253,12 @@
 同时应遵守：
 
 - `deploy/env/app.env.example` 是唯一 canonical env 示例来源
-- 本地 `.env` 与生产 `deploy/env/app.prod.env` 都必须从它创建或同步
+- 本地开发默认使用 `deploy/env/app.dev.env`
+- 生产部署默认使用 `deploy/env/app.prod.env`
 - 本地变量和生产变量不要无注释混写
 - provider-specific 变量应标明是否可选
-- 如果 `deploy/env/app.env.example` 新增了 active key，skill 在改造已有项目时应优先采用“非破坏性补齐缺失 key”的方式同步 `.env` 与 `app.prod.env`，而不是覆盖已有值
+- 如果 `deploy/env/app.env.example` 新增了 active key，skill 在改造已有项目时应优先采用“非破坏性补齐缺失 key”的方式同步 `app.dev.env` 与 `app.prod.env`，而不是覆盖已有值
+- 如果检测到历史根目录 `.env` 且 `deploy/env/app.dev.env` 尚不存在，可以在初始化阶段复制一次并明确提示开发者这是迁移产物
 - 如果项目要引入新的 `.env` 分层或新的部署 env 文件，必须先检查现有 env 配置并做合理迁移，保留已有有效值；不能因为基线目录结构不同就直接覆盖旧 `.env`、`.env.local` 或 deploy env 文件
 
 ## 13. 为什么要做成 skill
@@ -265,20 +280,24 @@
 
 ## 14. 当前仓库里哪些内容已经和 skill 同步更新
 
-这次 mixed-surface / 多部署单元能力补齐后，仓库里以下内容已经同步到同一套口径：
+这次产品化收敛后，仓库里以下层次已经同步到同一套口径：
 
 - `docs/README.md`
 - `README.md`
 - `skills/deploy-baseline-kit/SKILL.md`
-- `skills/deploy-baseline-kit/references/document-generation.md`
-- `skills/deploy-baseline-kit/references/verification.md`
-- `template/deploy/README.md`
-- `skills/deploy-baseline-kit/assets/template/deploy/README.md`
+- `src/rules/references/`
+- `skills/deploy-baseline-kit/references/`
+- `src/template/`
 
 可以把它们理解成三层：
 
 - 入口层：`README.md` 与 `docs/README.md`
 - 行为说明层：`docs/deploy-baseline-kit.md`
 - 执行规则层：`skills/deploy-baseline-kit/SKILL.md` 与 `references/`
+
+其中：
+
+- `src/template/`、`src/rules/` 是真源
+- `template/`、`skills/deploy-baseline-kit/assets/template/` 与 `skills/deploy-baseline-kit/references/` 是兼容输出
 
 如果后续继续演进 skill，原则上应至少同时检查这三层是否仍然一致。
