@@ -31,7 +31,7 @@
 模板里的 `Makefile` 默认提供两层命令：
 
 - 顶层统一入口：`make dev`、`make build`、`make test`、`make deploy`、`make rollback`、`make logs`
-- 常见辅助入口：`make help`、`make setup`、`make init`、`make local-env-sync`、`make prod-env-sync`、`make up`、`make down`、`make deploy-check`、`make prod-up`、`make prod-down`、`make prod-logs`、`make prod-status`、`make prod-health`、`make prod-version`、`make db-up`、`make db-down`、`make db-shell`
+- 常见辅助入口：`make help`、`make setup`、`make init`、`make local-env-sync`、`make prod-env-sync`、`make up`、`make down`、`make deploy-check`、`make prod-up`、`make prod-down`、`make prod-logs`、`make prod-status`、`make prod-health`、`make prod-version`、`make pg-check`、`make prod-pg-check`、`make db-up`、`make db-down`、`make db-shell`
 
 建议先把顶层统一入口的语义定义清楚，再决定哪些辅助命令需要保留、裁剪或扩展。
 
@@ -86,6 +86,7 @@ make prod-logs
 
 - 第一次本地启动：`make setup` → `make dev`
 - 环境变量模板更新后：`make local-env-sync` / `make prod-env-sync`
+- 排查 PostgreSQL 真实数据目录：`make pg-check` / `make prod-pg-check`
 - 发布前：`make deploy-check`
 - 发布后排查：`make prod-status` → `make prod-health` → `make prod-version` → `make prod-logs`
 
@@ -113,6 +114,14 @@ v1 明确不做：
 - 正式接入时，建议改为 `ghcr.io/<owner>/<repo>:sha-<git-sha>` 或 `ghcr.io/<owner>/<repo>:<semver>`
 - `make rollback` 应显式指定要回滚到的镜像版本
 - 部署文档中必须写清镜像 tag 规则和回滚验证方式
+
+PostgreSQL 18 数据卷注意事项：
+
+- `postgres:18-alpine` 不应再把命名卷挂到 `/var/lib/postgresql/data`
+- 推荐把命名卷挂到 `/var/lib/postgresql`，并显式设置 `PGDATA=/var/lib/postgresql/18/docker`
+- 否则 Docker 可能会因为镜像的 `VOLUME /var/lib/postgresql` 自动补一个匿名卷，导致真数据落进随机卷
+- 如果历史项目已出现随机卷，先用 `docker inspect` 和 `SELECT current_setting('data_directory');` 确认真数据目录，再迁移卷，不要直接删卷
+- 模板默认提供 `make pg-check` / `make prod-pg-check`，可直接查看当前挂载、`PGDATA` 和 `data_directory`
 
 env 模板建议：
 

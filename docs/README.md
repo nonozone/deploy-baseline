@@ -4,6 +4,12 @@
 
 ## 中文
 
+### 当前稳定版
+
+- 当前稳定版：`v1.0.2`
+- 发布时间：`2026-04-05`
+- Release：`https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
+
 ### 推荐阅读顺序
 
 如果你是第一次接触这个仓库，建议按下面顺序阅读：
@@ -48,6 +54,12 @@
 - 你要为仓库补 fixture、验证命令或 runnable examples
 
 ## English
+
+### Current Stable Release
+
+- Current stable release: `v1.0.2`
+- Published on: `2026-04-05`
+- Release: `https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
 
 ### Recommended Reading Order
 

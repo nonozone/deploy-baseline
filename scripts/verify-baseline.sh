@@ -38,6 +38,7 @@ required_template_files=(
   "scripts/build.sh"
   "scripts/test.sh"
   "scripts/env-sync-local.sh"
+  "scripts/pg-check.sh"
   "deploy/env/app.prod.env.example"
   "deploy/scripts/preflight.sh"
   "deploy/scripts/deploy.sh"
@@ -45,6 +46,7 @@ required_template_files=(
   "deploy/scripts/status.sh"
   "deploy/scripts/health.sh"
   "deploy/scripts/version.sh"
+  "deploy/scripts/pg-check.sh"
   "deploy/scripts/rollback.sh"
   "deploy/scripts/env-sync.sh"
   "deploy/README.md"
@@ -84,7 +86,7 @@ header "模板 Makefile 命令面检查"
 required_targets=(
   help setup init dev build test deploy rollback logs
   local-env-sync prod-env-sync deploy-check
-  up down prod-down prod-logs prod-status prod-health prod-version db-up db-down db-shell
+  up down prod-down prod-logs prod-status prod-health prod-version pg-check prod-pg-check db-up db-down db-shell
 )
 for target in "${required_targets[@]}"; do
   if grep -Eq "^${target}:" "$TEMPLATE_DIR/Makefile"; then
@@ -108,16 +110,67 @@ else
   pass "template/scripts/dev.sh 未使用后台启动"
 fi
 
-if grep -Fq "http://127.0.0.1:" "$TEMPLATE_DIR/scripts/dev.sh"; then
-  pass "template/scripts/dev.sh 输出本地访问地址"
+if grep -Fq "本地访问入口：" "$TEMPLATE_DIR/scripts/dev.sh"; then
+  pass "template/scripts/dev.sh 统一输出本地访问入口"
 else
-  fail "template/scripts/dev.sh 应输出本地访问地址"
+  fail "template/scripts/dev.sh 应统一输出本地访问入口"
+fi
+
+if grep -Fq "应用首页：" "$TEMPLATE_DIR/scripts/dev.sh" \
+  && grep -Fq "健康检查：" "$TEMPLATE_DIR/scripts/dev.sh" \
+  && grep -Fq "PostgreSQL：" "$TEMPLATE_DIR/scripts/dev.sh"; then
+  pass "template/scripts/dev.sh 输出应用与数据库访问地址"
+else
+  fail "template/scripts/dev.sh 应输出应用首页、健康检查和 PostgreSQL 入口"
 fi
 
 if cmp -s "$TEMPLATE_DIR/scripts/dev.sh" "$SKILL_DIR/assets/template/scripts/dev.sh"; then
   pass "template/scripts/dev.sh 与 skill 资产保持同步"
 else
   fail "template/scripts/dev.sh 与 skill 资产不一致"
+fi
+
+if cmp -s "$TEMPLATE_DIR/scripts/pg-check.sh" "$SKILL_DIR/assets/template/scripts/pg-check.sh"; then
+  pass "template/scripts/pg-check.sh 与 skill 资产保持同步"
+else
+  fail "template/scripts/pg-check.sh 与 skill 资产不一致"
+fi
+
+header "PostgreSQL 18 持久化路径检查"
+if grep -Fq 'PGDATA: /var/lib/postgresql/18/docker' "$TEMPLATE_DIR/docker-compose.yml"; then
+  pass "docker-compose.yml 使用 PostgreSQL 18 推荐 PGDATA"
+else
+  fail "docker-compose.yml 应使用 PGDATA=/var/lib/postgresql/18/docker"
+fi
+
+if grep -Fq -- '- pgdata:/var/lib/postgresql' "$TEMPLATE_DIR/docker-compose.yml"; then
+  pass "docker-compose.yml 挂载 PostgreSQL 18 推荐上层目录"
+else
+  fail "docker-compose.yml 应挂载 /var/lib/postgresql"
+fi
+
+if grep -Fq '/var/lib/postgresql/data' "$TEMPLATE_DIR/docker-compose.yml"; then
+  fail "docker-compose.yml 不应继续使用 PostgreSQL 18 旧挂载路径 /var/lib/postgresql/data"
+else
+  pass "docker-compose.yml 未使用 PostgreSQL 18 旧挂载路径"
+fi
+
+if grep -Fq 'PGDATA: /var/lib/postgresql/18/docker' "$TEMPLATE_DIR/docker-compose.prod.yml"; then
+  pass "docker-compose.prod.yml 使用 PostgreSQL 18 推荐 PGDATA"
+else
+  fail "docker-compose.prod.yml 应使用 PGDATA=/var/lib/postgresql/18/docker"
+fi
+
+if grep -Fq -- '- pgdata_prod:/var/lib/postgresql' "$TEMPLATE_DIR/docker-compose.prod.yml"; then
+  pass "docker-compose.prod.yml 挂载 PostgreSQL 18 推荐上层目录"
+else
+  fail "docker-compose.prod.yml 应挂载 /var/lib/postgresql"
+fi
+
+if grep -Fq '/var/lib/postgresql/data' "$TEMPLATE_DIR/docker-compose.prod.yml"; then
+  fail "docker-compose.prod.yml 不应继续使用 PostgreSQL 18 旧挂载路径 /var/lib/postgresql/data"
+else
+  pass "docker-compose.prod.yml 未使用 PostgreSQL 18 旧挂载路径"
 fi
 
 # ── 6. 镜像发布部署契约检查 ─────────────────────────────────────────
@@ -184,6 +237,7 @@ for rel_path in \
   "deploy/scripts/status.sh" \
   "deploy/scripts/health.sh" \
   "deploy/scripts/version.sh" \
+  "deploy/scripts/pg-check.sh" \
   "deploy/scripts/rollback.sh" \
   ".github/workflows/deploy.yml" \
   "deploy/env/app.prod.env.example" \

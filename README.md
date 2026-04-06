@@ -8,6 +8,12 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 
 ## 中文说明
 
+### 当前稳定版
+
+- 当前稳定版：`v1.0.2`
+- 发布时间：`2026-04-05`
+- Release：`https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
+
 ### 项目定位
 
 这个仓库不是业务项目本身，而是一套可以被复制、裁剪、再落地到真实项目中的通用资产，目标是统一：
@@ -208,6 +214,12 @@ Deploy Baseline is a reusable deployment baseline for containerized projects, in
 部署基线使用 `Apache-2.0` 协议。你可以在遵守协议的前提下自由使用、修改和分发。
 
 ## English
+
+### Current Stable Release
+
+- Current stable release: `v1.0.2`
+- Published on: `2026-04-05`
+- Release: `https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
 
 ### What This Repository Is
 

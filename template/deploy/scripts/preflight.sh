@@ -120,6 +120,17 @@ if grep -Eq '^[[:space:]]+build:' "$ROOT_DIR/docker-compose.prod.yml"; then
   exit 1
 fi
 
+if grep -Fq 'image: postgres:18' "$ROOT_DIR/docker-compose.prod.yml"; then
+  if grep -Fq '/var/lib/postgresql/data' "$ROOT_DIR/docker-compose.prod.yml"; then
+    echo "检测到 PostgreSQL 18 仍挂载旧路径 /var/lib/postgresql/data。请改为挂载 /var/lib/postgresql，并让 PGDATA 使用 /var/lib/postgresql/18/docker，避免 Docker 自动创建匿名卷。"
+    exit 1
+  fi
+  if ! grep -Fq 'PGDATA: /var/lib/postgresql/18/docker' "$ROOT_DIR/docker-compose.prod.yml"; then
+    echo "检测到 PostgreSQL 18，但未使用推荐 PGDATA=/var/lib/postgresql/18/docker。"
+    exit 1
+  fi
+fi
+
 export APP_IMAGE="$TARGET_IMAGE"
 
 if ! docker compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$PROD_ENV_FILE" config -q >/dev/null 2>&1; then

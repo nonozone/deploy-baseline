@@ -234,6 +234,14 @@ make prod-health
 - major version 相关存储注意事项
 - 修改挂载策略前是否必须备份
 
+如果项目使用 `postgres:18` 或更高版本，建议额外明确写清：
+
+- 不要再沿用 `17` 及以下常见的 `/var/lib/postgresql/data` 挂载方式
+- 推荐把命名卷挂到 `/var/lib/postgresql`
+- 推荐显式写出 `PGDATA=/var/lib/postgresql/18/docker`
+- 升级或修复时，先执行 `docker inspect <container>` 确认挂载，再执行 `SELECT current_setting('data_directory');` 确认真实数据目录
+- 如果已经出现随机匿名卷，应先停库、迁移数据到命名卷、验证无误后再删除旧卷
+
 ## 14. Provider 特有说明
 
 如果项目包含 `external-platform` 或 `external-static-hosting` 单元，至少说明：
@@ -258,7 +266,7 @@ make dev
 说明：
 
 - `make setup` 会初始化本地环境，并补齐 `.env` 与 `deploy/env/app.prod.env` 缺失项
-- `make dev` 会以前台方式启动开发环境，并显示访问地址
+- `make dev` 会以前台方式启动开发环境，并在进入持续日志前统一显示应用首页、健康检查和 PostgreSQL 入口
 - 如果 `.env.example` 后续新增了变量，可再次执行 `make local-env-sync`
 
 ### 15.2 第一次准备生产环境变量
@@ -344,6 +352,7 @@ make prod-logs
 - `APP_IMAGE` 是否还是模板占位值
 - `DB_PASSWORD` 是否还是 `replace-me`
 - `docker compose config -q` 是否报错
+- 如果是 PostgreSQL 18，执行 `make prod-pg-check` 确认挂载点是否为 `/var/lib/postgresql`
 
 ### 16.2 `make deploy` 失败
 

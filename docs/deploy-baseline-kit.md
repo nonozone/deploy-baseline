@@ -201,7 +201,7 @@
 - PostgreSQL 路线最完整
 - 其他数据库类型按需求驱动逐步完善
 
-同时 PostgreSQL 也不应只停留在“识别数据库类型”，还应对大版本部署差异保持敏感，例如数据目录、挂载策略和 `PGDATA` 约定。
+同时 PostgreSQL 也不应只停留在“识别数据库类型”，还应对大版本部署差异保持敏感，例如数据目录、挂载策略和 `PGDATA` 约定。一个已经很实际的例子就是 `postgres:18`：如果还沿用 `17` 时代常见的 `/var/lib/postgresql/data` 挂载路径，就可能因为镜像的 `VOLUME /var/lib/postgresql` 与默认 `PGDATA` 变更，额外生成随机匿名卷，甚至把真实数据写进匿名卷。因此当前基线应把 PostgreSQL 18 的默认策略收敛为：命名卷挂到 `/var/lib/postgresql`，并显式使用 `PGDATA=/var/lib/postgresql/18/docker`。
 
 ## 10. 什么时候适合用它
 

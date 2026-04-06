@@ -4,6 +4,10 @@
 
 `Deploy Baseline v1` 是一套面向新手、尤其是刚开始使用 vibe coding 的开发者的部署基线。
 
+当前稳定发布版本是 `v1.0.2`，已于 `2026-04-05` 发布：
+
+- `https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
+
 它不是大厂级部署平台，也不是一个要覆盖所有基础设施场景的系统。它的目标更简单：
 
 - 给新项目一个统一、清楚、可复制的部署起点

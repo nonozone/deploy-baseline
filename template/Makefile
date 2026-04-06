@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: help setup init local-env-sync prod-env-sync env-sync dev up down logs build test deploy-check deploy rollback prod-up prod-down prod-logs prod-status prod-health prod-version db-up db-down db-shell
+.PHONY: help setup init local-env-sync prod-env-sync env-sync dev up down logs build test deploy-check deploy rollback prod-up prod-down prod-logs prod-status prod-health prod-version pg-check prod-pg-check db-up db-down db-shell
 
 BOLD  := \033[1m
 RESET := \033[0m
@@ -80,6 +80,12 @@ prod-health: ## 检查生产服务健康状态
 
 prod-version: ## 查看生产服务当前镜像版本
 	bash deploy/scripts/version.sh
+
+pg-check: ## 检查本地 PostgreSQL 容器挂载与 data_directory
+	bash scripts/pg-check.sh
+
+prod-pg-check: ## 检查生产 PostgreSQL 容器挂载与 data_directory
+	bash deploy/scripts/pg-check.sh
 
 db-up: ## 启动数据库容器
 	$(COMPOSE_BASE) up -d $(DB_SERVICE)
