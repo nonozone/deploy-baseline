@@ -4,9 +4,9 @@
 
 `Deploy Baseline v1` 是一套面向新手、尤其是刚开始使用 vibe coding 的开发者的部署基线。
 
-当前稳定发布版本是 `v1.0.2`，已于 `2026-04-05` 发布：
+当前稳定发布版本是 `v1.1.0`，已于 `2026-04-06` 发布：
 
-- `https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
+- `https://github.com/nonozone/deploy-baseline/releases/tag/v1.1.0`
 
 它不是大厂级部署平台，也不是一个要覆盖所有基础设施场景的系统。它的目标更简单：
 
@@ -89,6 +89,8 @@ v1 明确不追求“大而全”。
 - 生产状态 / 健康 / 版本 / 日志排查命令
 - 第一次部署教程
 - 常见故障排查指南
+- 可安装的 `deploy-baseline-kit` skill 产品入口
+- 基于 `src/` 单一真源的模板、文档与规则打包链路
 
 ## 已知边界
 
@@ -107,11 +109,10 @@ v1 明确不追求“大而全”。
 如果你是第一次来到这个仓库，建议按这个顺序看：
 
 1. `docs/v1-release.md`
-2. `docs/baseline-standard.md`
-3. `docs/deployment-sop.md`
-4. `docs/deploy-baseline-kit.md`
-5. `template/README.md`
-6. `template/deploy/README.md`
+2. `docs/deploy-baseline-kit.md`
+3. `docs/baseline-standard.md`
+4. `docs/deployment-sop.md`
+5. `skills/deploy-baseline-kit/SKILL.md`
 
 ## 一句话总结
 

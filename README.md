@@ -10,9 +10,9 @@
 
 ### 当前稳定版
 
-- 当前稳定版：`v1.0.2`
-- 发布时间：`2026-04-05`
-- Release：`https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
+- 当前稳定版：`v1.1.0`
+- 发布时间：`2026-04-06`
+- Release：`https://github.com/nonozone/deploy-baseline/releases/tag/v1.1.0`
 
 ### 产品定位
 
@@ -147,9 +147,9 @@ env 路径已经统一为：
 
 ### Current Stable Release
 
-- Current stable release: `v1.0.2`
-- Published on: `2026-04-05`
-- Release: `https://github.com/nonozone/deploy-baseline/releases/tag/v1.0.2`
+- Current stable release: `v1.1.0`
+- Published on: `2026-04-06`
+- Release: `https://github.com/nonozone/deploy-baseline/releases/tag/v1.1.0`
 
 ### Product Positioning
 
